@@ -29,26 +29,14 @@ message roles by the serving layer, so a prompt cannot forge its own trust level
 
 ```
 src/heads_of_security/
-  attention_gating/          HuggingFace (eager) implementation
-    gating_core.py             gate parameters, the gate operator, the from_gates loader
-    gated_attention.py         LlamaAttentionGated
-    gated_model.py             LlamaGatedConfig / LlamaGatedForCausalLM
-    gpt_oss/                   GptOssAttentionGated, GptOssGatedForCausalLM, Harmony channel tokenizer
-    channel_tokenizer.py       role -> channel policy, chat walk, sidecar config (shared)
-    gated_tokenizer.py         LlamaGatedTokenizer (Llama-3 chat scaffold)
-    model_utils.py             load_gated_model(gates, base_model) -> (model, tokenizer)
-  vllm_gates/                vLLM (paged attention) implementation, pinned to vllm 0.27.x
-    kernel.py                  gated build of vLLM's unified Triton attention kernel
-    backend.py                 Triton attention backend that feeds the kernel its channels
-    model.py / model_llama.py  GptOssGatedForCausalLM / LlamaGatedForCausalLM for vLLM
-    channels.py, runner_patch.py   the per-step channel side-band
-    build_snapshot.py          base weights + gates -> loadable snapshot dir
-    server.py                  OpenAI-compatible server, channels derived from roles
-    offline.py                 GatedLLM: offline API taking (tokens, channels)
-  serve/                     Harmony rendering / tool-call parsing helpers used by the server
-gates/                       the five trained gate files (see gates/README.md)
-demos/                       inspect_gates.py, hf_generate.py, build_and_serve_vllm.sh, load_gates.ipynb
-tests/                       CPU unit tests on tiny configs
+  attention_gating/   HuggingFace implementation: gated attention for Llama and gpt-oss,
+                      channel-aware chat tokenizers, and the from_gates loader
+  vllm_gates/         vLLM implementation: patched attention kernel, gated model classes,
+                      snapshot builder, and an OpenAI-compatible server
+  serve/              Harmony rendering and tool-call parsing helpers used by the server
+gates/                the five trained gate files and their documentation
+demos/                scripts and a notebook showing how to inspect, load, and serve gates
+tests/                CPU unit tests on tiny configs
 ```
 
 ## Install
