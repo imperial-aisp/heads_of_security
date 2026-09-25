@@ -15,8 +15,7 @@ from heads_of_security.attention_gating import (
     LlamaGatedForCausalLM,
     LlamaGatedModel,
 )
-
-from .utils import copy_base_to_gated, tiny_llama_config
+from tests.utils import copy_base_to_gated, tiny_llama_config
 
 # ---------------------------------------------------------------------------
 # Helpers

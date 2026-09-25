@@ -21,29 +21,22 @@ instruction. A uniform table is an exact identity to the base model, so the init
 gpt-oss additionally gets a `sink_gates[q, h]` bias on its attention-sink logit; without it,
 "attend less to untrusted" can only be expressed as "attend less to everything".
 
-Channels are **out of band**: they are not tokens, they ride alongside `input_ids` (as a
-`token_channels` tensor in HF, as a per-request side-band in vLLM), and they are derived from
-message roles by the serving layer, so a prompt cannot forge its own trust level.
-
 ## Repository layout
 
 ```
 src/heads_of_security/
-  attention_gating/   HuggingFace implementation: gated attention for Llama and gpt-oss,
-                      channel-aware chat tokenizers, and the from_gates loader
-  vllm_gates/         vLLM implementation: patched attention kernel, gated model classes,
-                      snapshot builder, and an OpenAI-compatible server
+  attention_gating/   HuggingFace implementation: the shared gate operator and loader,
+                      the channel-aware chat tokenizer base, and one subpackage per model
+                      family (llama/, gpt_oss/) with its gated attention, model, and tokenizer
+  vllm_gates/         vLLM implementation: patched attention kernel, one gated model class
+                      per family, snapshot builder, and an OpenAI-compatible server
   serve/              Harmony rendering and tool-call parsing helpers used by the server
 gates/                the five trained gate files and their documentation
 demos/                scripts and a notebook showing how to inspect, load, and serve gates
-tests/                CPU unit tests on tiny configs
+tests/                CPU unit tests on tiny configs, one folder per model family
 ```
 
 ## Install
-
-Python 3.12+. The pins matter: the HF path threads `token_channels` through
-`transformers==5.9.0`'s attention modules, and the vLLM path patches `vllm==0.27.1`'s
-attention kernel by exact source anchors (a version drift fails loudly at import).
 
 ```bash
 uv sync                       # HF path + tests

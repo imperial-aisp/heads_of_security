@@ -1,6 +1,6 @@
 """Tests for ``GptOssGatedForCausalLM``.
 
-Mirrors ``tests/test_gated_model.py`` (the Llama suite) for the qk-gating-only
+Mirrors ``tests/llama/test_gated_model.py`` (the Llama suite) for the qk-gating-only
 gpt-oss stack. CPU, tiny configs.
 """
 

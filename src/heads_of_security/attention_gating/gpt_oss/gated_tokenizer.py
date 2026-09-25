@@ -5,7 +5,7 @@ gated run and a vLLM baseline run see identical prompts. We mirror HF's adapter
 rather than the richer native Harmony format because HF's template exposes only one
 instructions slot and builds the system turn from kwargs, not from ``messages``.
 
-How this differs from :class:`~heads_of_security.attention_gating.gated_tokenizer.LlamaGatedTokenizer`
+How this differs from :class:`~heads_of_security.attention_gating.llama.gated_tokenizer.LlamaGatedTokenizer`
 -------------------------------------------------------------------------------
 The Llama tokenizer builds ``input_ids`` piecewise, encoding scaffold and
 content separately and concatenating. Harmony interleaves plain-text boilerplate

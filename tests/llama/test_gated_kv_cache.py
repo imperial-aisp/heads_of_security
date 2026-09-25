@@ -12,8 +12,7 @@ from transformers import DynamicCache
 from transformers.models.llama.modeling_llama import LlamaForCausalLM
 
 from heads_of_security.attention_gating import LlamaGatedForCausalLM
-
-from .utils import copy_base_to_gated, tiny_llama_config
+from tests.utils import copy_base_to_gated, tiny_llama_config
 
 # ---------------------------------------------------------------------------
 # Helpers

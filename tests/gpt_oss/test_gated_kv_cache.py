@@ -1,6 +1,6 @@
 """KV-cache and ``.generate()`` tests for ``GptOssGatedForCausalLM``.
 
-Mirrors ``tests/test_gated_kv_cache.py``. Ground truth throughout is the
+Mirrors ``tests/llama/test_gated_kv_cache.py``. Ground truth throughout is the
 non-cached full forward (validated in ``test_gated_attention.py`` /
 ``test_gated_model.py``).
 

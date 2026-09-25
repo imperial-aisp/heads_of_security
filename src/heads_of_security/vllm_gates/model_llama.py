@@ -1,6 +1,6 @@
 """Channel-gated Llama for vLLM (Llama-3.1-8B / Llama-3.3-70B checkpoints).
 
-Same composition as :mod:`model` (gpt-oss), through llama.py's stock hooks
+Same composition as :mod:`model_gpt_oss`, through llama.py's stock hooks
 (``LlamaForCausalLM.__init__(layer_type=)`` / ``LlamaDecoderLayer(attn_layer_type=)``),
 with one difference: ``LlamaAttention`` has no ``_build_attention`` factory —
 its ``Attention`` is constructed inline — so the gated subclass evicts the
@@ -31,7 +31,7 @@ from vllm.model_executor.models.llama import (
 from vllm.v1.attention.backend import AttentionType
 
 from heads_of_security.vllm_gates.backend import GatedTritonAttentionBackend
-from heads_of_security.vllm_gates.model import build_gate_log_table, check_variant
+from heads_of_security.vllm_gates.gate_tables import build_gate_log_table, check_variant
 
 
 class LlamaAttentionGated(LlamaAttention):

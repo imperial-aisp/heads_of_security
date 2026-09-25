@@ -20,8 +20,7 @@ from heads_of_security.attention_gating import (
     LlamaGatedForCausalLM,
 )
 from heads_of_security.attention_gating.gating_core import infer_gating_from_state_dict
-
-from .utils import tiny_llama_config
+from tests.utils import tiny_llama_config
 
 
 def _fake_gate_state_dict(shape: tuple[int, ...], n_layers: int) -> dict[str, torch.Tensor]:

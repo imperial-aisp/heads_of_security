@@ -507,7 +507,7 @@ def main() -> None:
         role_kwargs["role_remap"] = dict(kv.split("=", 1) for kv in CFG.role_remap)
 
     if CFG.family == "llama":
-        from heads_of_security.attention_gating.gated_tokenizer import LlamaGatedTokenizer
+        from heads_of_security.attention_gating.llama.gated_tokenizer import LlamaGatedTokenizer
 
         TOK = LlamaGatedTokenizer.from_pretrained(CFG.base_model, chat_template_channel=True, **role_kwargs)
     else:

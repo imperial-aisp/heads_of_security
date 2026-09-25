@@ -1,13 +1,5 @@
 """Channel-gated Llama and gpt-oss models (HuggingFace eager path)."""
 
-from .gated_attention import LlamaAttentionGated
-from .gated_model import (
-    LlamaGatedConfig,
-    LlamaGatedDecoderLayer,
-    LlamaGatedForCausalLM,
-    LlamaGatedModel,
-)
-from .gated_tokenizer import LlamaGatedTokenizer
 from .gpt_oss import (
     GptOssAttentionGated,
     GptOssGatedConfig,
@@ -15,6 +7,14 @@ from .gpt_oss import (
     GptOssGatedForCausalLM,
     GptOssGatedModel,
     GptOssGatedTokenizer,
+)
+from .llama import (
+    LlamaAttentionGated,
+    LlamaGatedConfig,
+    LlamaGatedDecoderLayer,
+    LlamaGatedForCausalLM,
+    LlamaGatedModel,
+    LlamaGatedTokenizer,
 )
 
 __all__ = [

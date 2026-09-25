@@ -17,7 +17,7 @@ from transformers.models.llama.modeling_llama import (
     eager_attention_forward,
 )
 
-from .gating_core import GatedAttentionMixin
+from ..gating_core import GatedAttentionMixin
 
 
 class LlamaAttentionGated(LlamaAttention, GatedAttentionMixin):

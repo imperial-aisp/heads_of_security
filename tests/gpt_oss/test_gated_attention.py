@@ -1,6 +1,6 @@
 """Unit tests for ``GptOssAttentionGated``.
 
-Mirrors ``tests/test_gated_attention.py`` (the Llama suite). gpt-oss-specific
+Mirrors ``tests/llama/test_gated_attention.py`` (the Llama suite). gpt-oss-specific
 behaviour (attention sinks, sliding windows) lives in ``test_sinks.py`` and
 ``test_sliding_window.py``.
 

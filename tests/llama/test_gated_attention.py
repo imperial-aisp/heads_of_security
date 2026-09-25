@@ -10,8 +10,7 @@ import torch
 from transformers.models.llama.modeling_llama import LlamaAttention
 
 from heads_of_security.attention_gating import LlamaAttentionGated
-
-from .utils import causal_mask, position_embeddings, tiny_llama_config
+from tests.utils import causal_mask, position_embeddings, tiny_llama_config
 
 # ---------------------------------------------------------------------------
 # Helpers

@@ -1,6 +1,6 @@
 """Tests for ``GptOssGatedTokenizer`` (the Harmony channel tokenizer).
 
-Mirrors ``tests/test_gated_tokenizer.py`` (the Llama suite) and adds the checks
+Mirrors ``tests/llama/test_gated_tokenizer.py`` (the Llama suite) and adds the checks
 Harmony specifically needs. CPU-only; loads the real gpt-oss tokenizer (a few MB)
 because the Harmony scaffold tokens and BPE boundaries are vocab-specific.
 

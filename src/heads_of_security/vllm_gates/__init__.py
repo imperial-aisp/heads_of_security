@@ -6,8 +6,9 @@ serving stack:
 
 - :mod:`kernel`        — unified triton attention kernel + channel-pair log-bias
 - :mod:`backend`       — Triton backend that feeds the kernel its channels
-- :mod:`model`         — ``GptOssGatedForCausalLM`` (vLLM model registry name)
+- :mod:`model_gpt_oss` — ``GptOssGatedForCausalLM`` (vLLM model registry name)
 - :mod:`model_llama`   — ``LlamaGatedForCausalLM``
+- :mod:`gate_tables`   — per-rank logsigmoid gate tables shared by both models
 - :mod:`channels`      — the out-of-band per-token channel side-band
 - :mod:`runner_patch`  — publishes each step's channel tape from the runner
 - :mod:`build_snapshot`— builds a loadable model dir (base weights + gates)
@@ -69,7 +70,7 @@ def register() -> None:
     from heads_of_security.vllm_gates import runner_patch
 
     ModelRegistry.register_model(
-        "GptOssGatedForCausalLM", "heads_of_security.vllm_gates.model:GptOssGatedForCausalLM"
+        "GptOssGatedForCausalLM", "heads_of_security.vllm_gates.model_gpt_oss:GptOssGatedForCausalLM"
     )
     ModelRegistry.register_model(
         "LlamaGatedForCausalLM", "heads_of_security.vllm_gates.model_llama:LlamaGatedForCausalLM"

@@ -13,8 +13,8 @@ from transformers.models.llama.modeling_llama import (
     LlamaModel,
 )
 
+from ..gating_core import GatedCausalLMMixin
 from .gated_attention import LlamaAttentionGated
-from .gating_core import GatedCausalLMMixin
 
 logger = logging.getLogger(__name__)
 

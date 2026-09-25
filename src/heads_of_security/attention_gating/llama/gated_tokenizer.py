@@ -13,7 +13,7 @@ import datetime
 import json
 from typing import Optional, Union
 
-from .channel_tokenizer import ChannelTokenizerMixin
+from ..channel_tokenizer import ChannelTokenizerMixin
 
 # Llama-3's hardcoded "today" string from its stock chat template — matches
 # the default that ``apply_chat_template(date_string=None)`` substitutes in.
