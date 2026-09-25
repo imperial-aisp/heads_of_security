@@ -95,18 +95,43 @@ def main() -> None:
         import matplotlib
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
+        from matplotlib.colors import LinearSegmentedColormap
 
-        D = (V[0, 1] - V[0, 0]).T  # [H, L]: heads on y, layers on x
-        lim = np.percentile(np.abs(D), 99) or 1.0
-        fig, ax = plt.subplots(figsize=(max(4.0, 0.08 * L + 1.6), 0.08 * H + 1.2))
-        im = ax.imshow(D, cmap="coolwarm", vmin=-lim, vmax=lim, aspect="equal", interpolation="nearest",
-                       extent=(0.5, L + 0.5, H + 0.5, 0.5))
-        ax.set_xlabel("layer")
-        ax.set_ylabel("head")
-        ax.set_title(f"{args.gates.parent.parent.name} {args.gates.parent.name}: "
-                     "log-bias on untrusted vs trusted keys (trusted query)", fontsize=9)
-        fig.colorbar(im, ax=ax, fraction=0.03, pad=0.02, label="nats")
-        fig.savefig(args.plot, bbox_inches="tight")
+        plt.rcParams.update({"font.size": 10, "axes.labelsize": 12, "xtick.labelsize": 10, "ytick.labelsize": 10,
+                             "axes.spines.top": False, "axes.spines.right": False, "axes.edgecolor": "#333333",
+                             "axes.linewidth": 0.8, "xtick.direction": "out", "ytick.direction": "out",
+                             "savefig.bbox": "tight", "savefig.pad_inches": 0.02, "pdf.fonttype": 42})
+        # coolwarm with its grey midpoint blended toward white, so "no effect" reads as no effect.
+        base = matplotlib.colormaps["coolwarm"](np.linspace(0, 1, 256))
+        x = np.linspace(0, 1, 256)
+        w = 0.75 * (1 - np.abs(2 * x - 1)) ** 2
+        base[:, :3] = base[:, :3] * (1 - w[:, None]) + w[:, None]
+        cmap = LinearSegmentedColormap.from_list("coolwarm_whitened", base)
+
+        # Shift of attention from untrusted to trusted keys for a trusted query: warm = suppresses
+        # untrusted. Heads on y, layers on x, square cells sized in inches, 1-based axes.
+        M = B[:, 0, 0, :] - B[:, 0, 1, :]
+        D = M.T
+        ny, nx = D.shape
+        v = np.percentile(np.abs(M), 99) or 1.0
+        cell, pad = 0.055, dict(left=0.55, right=1.35, bottom=0.47, top=0.15)
+        w_ax, h_ax = nx * cell, ny * cell
+        figsize = (pad["left"] + w_ax + pad["right"], pad["bottom"] + h_ax + pad["top"])
+        fig = plt.figure(figsize=figsize)
+        fig.set_layout_engine("none")
+        ax = fig.add_axes([pad["left"] / figsize[0], pad["bottom"] / figsize[1], w_ax / figsize[0], h_ax / figsize[1]])
+        im = ax.imshow(D, cmap=cmap, vmin=-v, vmax=v, aspect="equal", interpolation="nearest",
+                       extent=(0.5, nx + 0.5, ny + 0.5, 0.5))
+        ax.set_xlabel("Layer")
+        ax.set_ylabel("Head")
+        for axis, count in ((ax.xaxis, nx), (ax.yaxis, ny)):
+            step = 10 if count >= 40 else 5
+            axis.set_ticks([1] + list(range(step, count + 1, step)))
+        ax.grid(False)
+        cax = fig.add_axes([(pad["left"] + w_ax + 0.12) / figsize[0], pad["bottom"] / figsize[1],
+                            0.13 / figsize[0], h_ax / figsize[1]])
+        fig.colorbar(im, cax=cax, label="Attention shift\n" + r"(untrusted $\rightarrow$ trusted)")
+        fig.savefig(args.plot)
         print(f"\n  wrote {args.plot}")
 
 
