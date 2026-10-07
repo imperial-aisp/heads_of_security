@@ -21,8 +21,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# vLLM serving. vllm 0.27.1 pins torch==2.13.0 and transformers>=5.5.3, both compatible
-# with the base pins above. `uv sync --extra vllm` on a GPU box.
 vllm = ["vllm==0.27.1", "fastapi>=0.115", "uvicorn>=0.30", "pydantic>=2"]
 demos = ["matplotlib>=3.10", "jupyter>=1.1"]
 dev = ["pytest>=8", "ruff>=0.8"]
