@@ -10,8 +10,8 @@
 # training only if the accumulation is raised to keep 64, e.g. for gpt-oss on one GPU:
 #   NPROC=1 demos/train_gates.sh gptoss 0.1 gradient_accumulation_steps=64
 #
-# The training data is a private Hugging Face dataset (imperial-cpg/heads-of-security-dpo); set
-# HF_TOKEN or `huggingface-cli login` first. The result lands in $OUT/gates/epoch_0.safetensors,
+# The training data is on Hugging Face (imperial-cpg/heads-of-security-dpo).
+# The result lands in $OUT/gates/epoch_0.safetensors,
 # which load_gated_model_local() / push_gates() take directly.
 set -euo pipefail
 FAMILY=${1:?usage: $0 gptoss|llama [lr]}

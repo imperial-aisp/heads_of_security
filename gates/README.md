@@ -52,7 +52,7 @@ The [gate exploration notebook](../demos/gates_explore.ipynb) shows how the gate
 
 The repository includes code to train new gates with Direct Preference Optimization (DPO). Only the gates are trained; the base model stays frozen. Training favors responses that follow the user's task over injected instructions.
 
-See the [training instructions](../README.md#training-your-own-gates) for setup and commands, and the [training configs](../configs/training/) for model settings. The default configs use a private Hugging Face dataset and require access.
+See the [training instructions](../README.md#training-your-own-gates) for setup and commands, and the [training configs](../configs/training/) for model settings. The default configs use the public Hugging Face dataset `imperial-cpg/heads-of-security-dpo`.
 
 Training saves gates to `runs/<name>/gates/epoch_0.safetensors`. Pass that path to `load_gated_model_local` using the example above.
 

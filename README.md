@@ -26,8 +26,8 @@ The loader downloads the gates and the corresponding base model. Use `device="au
 
 Available models:
 
-| Model ID | Base model | 
-| --- | --- | 
+| Model ID | Base model |
+| --- | --- |
 | `imperial-cpg/hos-gpt-oss-20b` | GPT-OSS-20B |
 | `imperial-cpg/hos-llama-3.3-70b-instruct` | Llama-3.3-70B-Instruct |
 
@@ -54,7 +54,7 @@ The [demo script](demos/build_and_serve_vllm.sh) builds the gated model and star
 
 Training uses Direct Preference Optimization (DPO) to favor responses that follow the user's task over injected instructions. Only the gates are trained; the base model stays frozen.
 
-The dataset is on Huggingface `imperial-cpg/heads-of-security-dpo`: it's SecAlign's CleanAlpaca data, augmented with
+The dataset is on Hugging Face `imperial-cpg/heads-of-security-dpo`: it's SecAlign's CleanAlpaca data, augmented with
 reasoning traces from GPT-OSS-120B.
 
 Install the training dependencies:
@@ -70,9 +70,9 @@ bash demos/train_gates.sh gptoss 0.1     # eight 80 GB GPUs, about 4 hours
 bash demos/train_gates.sh llama 0.008   # eight 80 GB GPUs, about 2 hours
 ```
 
-The second argument sets the learning rate. Other settings are in [the training configs](configs/training/). 
+The second argument sets the learning rate. Other settings are in [the training configs](configs/training/).
 
-GPT-OSS-20B also cat fit on a single GPU, but keep the effective batch at 64 to get the same training:
+GPT-OSS-20B can also fit on a single GPU, but keep the effective batch at 64 to get the same training:
 
 ```bash
 NPROC=1 bash demos/train_gates.sh gptoss 0.1 gradient_accumulation_steps=64
@@ -108,6 +108,13 @@ uv run pytest
 ```
 
 Tests use small models on CPU. Tokenizer tests download the base model tokenizers.
+
+Training tests are optional and skip automatically when training dependencies are missing. To run the full suite, including training tests:
+
+```bash
+uv sync --extra dev --extra train
+uv run pytest
+```
 
 ## Method summary
 

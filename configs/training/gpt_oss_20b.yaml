@@ -27,8 +27,8 @@ tokenizer:
   untrusted_inline_roles: ["input"]   # the data region of each training prompt
   chat_template_channel: true         # template tokens get their own channel (2)
 
-# Preference pairs (see the dataset card for the schema). hf:// needs a Hugging Face token
-# with access to the private repo (HF_TOKEN or `huggingface-cli login`); a local path works too.
+# Preference pairs (see the dataset card for the schema).
+# Load from the public Hugging Face dataset or a local path.
 dataset:
   _component_: heads_of_security.training.channel_dataset.channel_preference_dataset
   source: json

@@ -1,9 +1,3 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-# All rights reserved.
-#
-# This source code is licensed under the BSD-style license found in the
-# LICENSE file in the root directory of this source tree.
-#
 # Derived from torchtune 0.6.1 ``full_dpo_distributed.py``, reduced to what gate training
 # needs: an HF gated model with ``token_channels`` threaded through the forward, the base
 # frozen and only the gate tensors trained, the *same* model with ``token_channels=None`` as
