@@ -8,7 +8,13 @@ The code supports GPT-OSS-20B and Llama-3.3-70B-Instruct with Hugging Face Trans
 
 ## Quick start
 
-Install from the repository root with Python 3.12 or later and `uv`:
+Install from PyPI with Python 3.12 or later:
+
+```bash
+pip install heads-of-security
+```
+
+To install from source:
 
 ```bash
 uv sync
@@ -31,15 +37,17 @@ Available models:
 | `imperial-cpg/hos-gpt-oss-20b` | GPT-OSS-20B |
 | `imperial-cpg/hos-llama-3.3-70b-instruct` | Llama-3.3-70B-Instruct |
 
-See the [introduction notebook](demos/introduction.ipynb) for a complete example of preparing messages, assigning trust channels, and generating responses. To install the notebook dependencies:
+See the [introduction notebook](demos/introduction.ipynb) for a complete example of preparing messages, assigning trust channels, and generating responses. To run it, clone this repository and run from its root:
 
 ```bash
 uv sync --extra demos
 ```
 
+The notebook uses a GPU; it has been tested on an NVIDIA H100 with 80 GB of memory.
+
 ## vLLM example
 
-Install vLLM and run the demo on a GPU machine:
+From a repository checkout, install vLLM and run the demo on a GPU machine with `uv`:
 
 ```bash
 uv sync --extra vllm
@@ -57,7 +65,7 @@ Training uses Direct Preference Optimization (DPO) to favor responses that follo
 The dataset is on Hugging Face `imperial-cpg/heads-of-security-dpo`: it's SecAlign's CleanAlpaca data, augmented with
 reasoning traces from GPT-OSS-120B.
 
-Install the training dependencies:
+From the repository root, install the training dependencies with `uv`:
 
 ```bash
 uv sync --extra train
