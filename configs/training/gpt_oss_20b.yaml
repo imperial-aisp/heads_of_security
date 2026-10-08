@@ -1,0 +1,85 @@
+# Heads of Security gates on gpt-oss-20b: content gates + sink gates, DPO, base frozen.
+# The released gates/gpt-oss-20b/lr0.1 arm is this config at optimizer.lr=0.1
+# (the sweep was lr 0.01 / 0.025 / 0.05 / 0.1).
+#
+#   uv run tune run --nproc_per_node 8 src/heads_of_security/training/full_dpo_distributed.py \
+#       --config configs/training/gpt_oss_20b.yaml output_dir=runs/gptoss20b_lr0.1 optimizer.lr=0.1
+#
+# 8 x 80 GB GPUs as in the paper: batch 1 x 8 accumulation steps per rank x 8 ranks = 64 pairs per
+# optimizer step, 268 steps, about 4 hours. The model itself fits on one GPU (base frozen,
+# 18k trainable parameters); to train on fewer GPUs keep the effective batch at 64 by raising
+# gradient_accumulation_steps (one GPU: gradient_accumulation_steps=64, about 8x the wall time).
+# Any key can be overridden on the command line as key=value, nested keys with dots.
+
+output_dir: null            # required: set on the command line
+base_model: openai/gpt-oss-20b
+
+model:
+  _component_: heads_of_security.training.model_builder.build_gated
+  checkpoint_dir: ${base_model}
+  gating_init_logit: 1.0    # every gate starts open; the init is an exact identity to the base
+  gating_sink: true         # also gate the attention-sink logit (see gating_core._init_qk_gates)
+  # gating_num_channels is filled in from the tokenizer (3: trusted / untrusted / template)
+
+tokenizer:
+  _component_: heads_of_security.training.tokenizer.training_tokenizer
+  model_id: ${base_model}
+  untrusted_inline_roles: ["input"]   # the data region of each training prompt
+  chat_template_channel: true         # template tokens get their own channel (2)
+
+# Preference pairs (see the dataset card for the schema). hf:// needs a Hugging Face token
+# with access to the private repo (HF_TOKEN or `huggingface-cli login`); a local path works too.
+dataset:
+  _component_: heads_of_security.training.channel_dataset.channel_preference_dataset
+  source: json
+  data_files: hf://datasets/imperial-cpg/heads-of-security-dpo/gpt-oss-20b/train.json.gz
+  max_seq_len: 4096
+  include_final_channel_prefix: false  # the responses carry their own analysis/final markers
+  split: train
+eval_dataset:
+  _component_: heads_of_security.training.channel_dataset.channel_preference_dataset
+  source: json
+  data_files: hf://datasets/imperial-cpg/heads-of-security-dpo/gpt-oss-20b/eval.json.gz
+  max_seq_len: 4096
+  include_final_channel_prefix: false
+  split: train
+eval_every_n_steps: 20
+eval_max_batches: 8
+seed: null
+shuffle: true
+
+optimizer:
+  _component_: torch.optim.AdamW
+  fused: true
+  weight_decay: 0.0
+  lr: 0.1
+lr_scheduler:
+  _component_: torchtune.training.lr_schedulers.get_cosine_schedule_with_warmup
+  num_warmup_steps: 0
+loss:
+  _component_: torchtune.rlhf.loss.DPOLoss   # beta 0.1, no label smoothing
+
+freeze_base: true
+epochs: 1
+batch_size: 1
+gradient_accumulation_steps: 8
+max_steps_per_epoch: null
+clip_grad_norm: 1.0
+save_every_n_steps: 500
+keep_last_n_checkpoints: 3
+
+# Metrics go to stdout and ${output_dir}/logs. Swap in WandBLogger to track a sweep:
+#   metric_logger:
+#     _component_: torchtune.training.metric_logging.WandBLogger
+#     project: heads-of-security
+#     log_dir: ${output_dir}/logs
+metric_logger:
+  _component_: torchtune.training.metric_logging.DiskLogger
+  log_dir: ${output_dir}/logs
+log_every_n_steps: 1
+log_peak_memory_stats: true
+
+device: cuda
+dtype: bf16
+enable_activation_checkpointing: true
+enable_activation_offloading: false

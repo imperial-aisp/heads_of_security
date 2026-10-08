@@ -16,7 +16,7 @@ Paths below are relative to this folder. `lr` is the learning rate used to train
 
 GPT-OSS gates contain about 18,000 parameters per file; Llama gates contain about 46,000.
 
-Learning rate controls security--utility trade-off: higer lr generally corresponds to lower utility but also lower ASR.
+Higher learning rates generally reduce attack success, but can also reduce performance on normal tasks.
 
 ## Load local gates
 
@@ -48,8 +48,14 @@ Each attention head has its own gates. They help the model use tool results whil
 
 The [gate exploration notebook](../demos/gates_explore.ipynb) shows how the gates vary across layers and heads.
 
-## Training and file format
+## Training your own gates
 
-Only the gates were trained; the base model stayed frozen. Training used Direct Preference Optimization (DPO) to favor responses that follow the user's task over responses that follow an injected instruction in a tool result.
+The repository includes code to train new gates with Direct Preference Optimization (DPO). Only the gates are trained; the base model stays frozen. Training favors responses that follow the user's task over injected instructions.
 
-Each `safetensors` file contains per-layer `head_gates`, indexed by query channel, key channel, and attention head. GPT-OSS files also contain `sink_gates` for the model's attention sinks. The loader reads the gate configuration directly from these tensors.
+See the [training instructions](../README.md#training-your-own-gates) for setup and commands, and the [training configs](../configs/training/) for model settings. The default configs use a private Hugging Face dataset and require access.
+
+Training saves gates to `runs/<name>/gates/epoch_0.safetensors`. Pass that path to `load_gated_model_local` using the example above.
+
+## File format
+
+Each `safetensors` file stores attention gates for every layer. GPT-OSS files also include attention-sink gates. The loader reads the gate configuration from the file automatically.

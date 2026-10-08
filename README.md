@@ -28,7 +28,7 @@ Available models:
 
 | Model ID | Base model | 
 | --- | --- | 
-| `imperial-cpg/hos-gpt-oss-20b` | GPT-OSS-20B 
+| `imperial-cpg/hos-gpt-oss-20b` | GPT-OSS-20B |
 | `imperial-cpg/hos-llama-3.3-70b-instruct` | Llama-3.3-70B-Instruct |
 
 See the [introduction notebook](demos/introduction.ipynb) for a complete example of preparing messages, assigning trust channels, and generating responses. To install the notebook dependencies:
@@ -50,16 +50,54 @@ For Llama, replace `gptoss` with `llama` (uses four GPUs by default).
 
 The [demo script](demos/build_and_serve_vllm.sh) builds the gated model and starts an OpenAI-compatible API on port 8000. It includes a sample request. The server assigns trust channels automatically, treating tool results as untrusted data.
 
+## Training your own gates
+
+Training uses Direct Preference Optimization (DPO) to favor responses that follow the user's task over injected instructions. Only the gates are trained; the base model stays frozen.
+
+The dataset is on Huggingface `imperial-cpg/heads-of-security-dpo`: it's SecAlign's CleanAlpaca data, augmented with
+reasoning traces from GPT-OSS-120B.
+
+Install the training dependencies:
+
+```bash
+uv sync --extra train
+```
+
+Run the [training script](demos/train_gates.sh) from the repository root:
+
+```bash
+bash demos/train_gates.sh gptoss 0.1     # eight 80 GB GPUs, about 4 hours
+bash demos/train_gates.sh llama 0.008   # eight 80 GB GPUs, about 2 hours
+```
+
+The second argument sets the learning rate. Other settings are in [the training configs](configs/training/). 
+
+GPT-OSS-20B also cat fit on a single GPU, but keep the effective batch at 64 to get the same training:
+
+```bash
+NPROC=1 bash demos/train_gates.sh gptoss 0.1 gradient_accumulation_steps=64
+```
+
+To override any other setting, add it to the command:
+
+```bash
+bash demos/train_gates.sh gptoss 0.1 max_steps_per_epoch=50
+```
+
+Each run saves its gates to `runs/<name>/gates/epoch_0.safetensors`. Load them with `load_gated_model_local` as shown in [the gate documentation](gates/README.md#load-local-gates).
+
 ## Repository structure and tests
 
 ```text
 src/heads_of_security/
   attention_gating/   Transformers models, tokenizers, and gate loading
   vllm_gates/         vLLM integration and server
-  serve/             Message formatting and tool-call parsing
+  serve/              Message formatting and tool-call parsing
+  training/           DPO recipe for training new gates (see above)
+configs/training/   Training configs for the two released models
 gates/              Trained gate files
-demos/              Notebooks and serving example
-tests/              Tests for gating, tokenizers, loading, and generation
+demos/              Notebooks, serving and training launchers
+tests/              Tests for gating, tokenizers, loading, generation, and training data
 ```
 
 Run the tests:

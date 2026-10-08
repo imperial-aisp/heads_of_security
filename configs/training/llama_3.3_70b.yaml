@@ -1,0 +1,72 @@
+# Heads of Security gates on Llama-3.3-70B-Instruct: content gates, DPO, base frozen.
+# The released gates/llama-3.3-70b-instruct/lr0.008 arm is this config.
+#
+#   uv run tune run --nproc_per_node 8 src/heads_of_security/training/full_dpo_distributed.py \
+#       --config configs/training/llama_3.3_70b.yaml output_dir=runs/llama70b_lr0.008
+#
+# bf16 weights are ~140 GB, so the model is FSDP-sharded over the GPUs; 8 x 80 GB with
+# activation offloading is the tested setup: batch 1 x 8 accumulation x 8 ranks = 64 pairs per
+# optimizer step, 282 steps, about 2 hours. Fewer GPUs need gradient_accumulation_steps raised
+# to keep the effective batch at 64.
+
+output_dir: null            # required: set on the command line
+base_model: meta-llama/Llama-3.3-70B-Instruct
+
+model:
+  _component_: heads_of_security.training.model_builder.build_gated
+  checkpoint_dir: ${base_model}
+  gating_init_logit: 1.0
+
+tokenizer:
+  _component_: heads_of_security.training.tokenizer.training_tokenizer
+  model_id: ${base_model}
+  untrusted_inline_roles: ["input"]
+  chat_template_channel: true
+
+dataset:
+  _component_: heads_of_security.training.channel_dataset.channel_preference_dataset
+  source: json
+  data_files: hf://datasets/imperial-cpg/heads-of-security-dpo/llama-3.3-70b/train.json.gz
+  max_seq_len: 768
+  split: train
+eval_dataset:
+  _component_: heads_of_security.training.channel_dataset.channel_preference_dataset
+  source: json
+  data_files: hf://datasets/imperial-cpg/heads-of-security-dpo/llama-3.3-70b/eval.json.gz
+  max_seq_len: 1024
+  split: train
+eval_every_n_steps: 20
+eval_max_batches: 8
+seed: null
+shuffle: true
+
+optimizer:
+  _component_: torch.optim.AdamW
+  fused: true
+  weight_decay: 0.0
+  lr: 0.008
+lr_scheduler:
+  _component_: torchtune.training.lr_schedulers.get_cosine_schedule_with_warmup
+  num_warmup_steps: 0
+loss:
+  _component_: torchtune.rlhf.loss.DPOLoss
+
+freeze_base: true
+epochs: 1
+batch_size: 1
+gradient_accumulation_steps: 8
+max_steps_per_epoch: null
+clip_grad_norm: 1.0
+save_every_n_steps: 500
+keep_last_n_checkpoints: 3
+
+metric_logger:
+  _component_: torchtune.training.metric_logging.DiskLogger
+  log_dir: ${output_dir}/logs
+log_every_n_steps: 1
+log_peak_memory_stats: true
+
+device: cuda
+dtype: bf16
+enable_activation_checkpointing: true
+enable_activation_offloading: true
