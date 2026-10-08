@@ -26,6 +26,13 @@ Load a model with its trained gates:
 from heads_of_security import load_gated_model
 
 model, tokenizer = load_gated_model("imperial-cpg/hos-gpt-oss-20b", device="cuda:0")
+enc = tokenizer.apply_chat_template_with_channels(messages, tools=tools)
+
+out = model.generate(
+    input_ids=enc["input_ids"],
+    attention_mask=enc["attention_mask"],
+    token_channels=enc["token_channels"],
+)
 ```
 
 The loader downloads the gates and the corresponding base model. Use `device="auto"` to distribute a model across GPUs.
