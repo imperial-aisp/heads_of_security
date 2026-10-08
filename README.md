@@ -1,127 +1,82 @@
 # Heads of Security
 
-Trained per-head **trust-channel gates** on attention, as a defense against prompt injection
-in tool-using LLM agents. This repository contains the inference implementation for
-`openai/gpt-oss-20b` and `meta-llama/Llama-3.3-70B-Instruct` in two backends, HuggingFace
-transformers (eager) and vLLM, together with the trained gate tensors used in the paper and
-demos showing how to load and run them.
+## Summary
 
-## The method in one paragraph
+This repository provides the code and trained gates for **Heads of Security**, a method for enforcing instruction–data separation through learned per-head attention gates. The gates help the model use untrusted data, such as tool results, without following instructions embedded in it.
 
-Every token of a prompt is assigned a *channel*: 0 = **trusted** (system prompt, user turns,
-the assistant's own outputs), 1 = **untrusted** (tool results), 2 = **scaffold** (chat-template
-tokens). Each attention head `h` in each layer gets a tiny table of logits
-`head_gates[q, k, h]` over (query channel, key channel) pairs. At inference,
-`logsigmoid(head_gates[q, k, h])` is added to the pre-softmax attention score of every
-(query of channel `q`, key of channel `k`) pair, so a head can learn to attend *less* to
-untrusted tokens when serving a trusted query while leaving everything else untouched. The
-base model is frozen; only the gates (18k parameters on gpt-oss-20b, 46k on Llama-70B) are
-trained, by DPO on preference pairs where the rejected response follows an injected
-instruction. A uniform table is an exact identity to the base model, so the init is lossless.
-gpt-oss additionally gets a `sink_gates[q, h]` bias on its attention-sink logit; without it,
-"attend less to untrusted" can only be expressed as "attend less to everything".
-
-## Repository layout
-
-```
-src/heads_of_security/
-  attention_gating/   HuggingFace implementation: the shared gate operator and loader,
-                      the channel-aware chat tokenizer base, and one subpackage per model
-                      family (llama/, gpt_oss/) with its gated attention, model, and tokenizer
-  vllm_gates/         vLLM implementation: patched attention kernel, one gated model class
-                      per family, snapshot builder, and an OpenAI-compatible server
-  serve/              Harmony rendering and tool-call parsing helpers used by the server
-gates/                the five trained gate files and their documentation
-demos/                scripts and a notebook showing how to inspect, load, and serve gates
-tests/                CPU unit tests on tiny configs, one folder per model family
-```
-
-## Install
-
-```bash
-uv sync                       # HF path + tests
-uv sync --extra vllm          # add vLLM serving (GPU box)
-uv sync --extra demos         # matplotlib / jupyter for the demos
-```
-
-`uv sync` installs the package, which is what registers the vLLM plugin entry point
-(`vllm.general_plugins`); a bare `PYTHONPATH=src` checkout can run the HF path but not
-vLLM with spawned workers.
+The code supports GPT-OSS-20B and Llama-3.3-70B-Instruct with Hugging Face Transformers and vLLM.
 
 ## Quick start
 
-**Inspect a gates file (CPU, seconds):**
+Install from the repository root with Python 3.12 or later and `uv`:
 
 ```bash
-python demos/inspect_gates.py gates/gpt-oss-20b/lr0.1/gates.safetensors --plot heatmap.pdf
+uv sync
 ```
 
-**HuggingFace:**
+Load a model with its trained gates:
 
 ```python
-import torch
-from heads_of_security.attention_gating.model_utils import load_gated_model
+from heads_of_security import load_gated_model
 
-model, tok = load_gated_model("gates/gpt-oss-20b/lr0.1/gates.safetensors", "openai/gpt-oss-20b", device="cuda:0")
-enc = tok.apply_chat_template_with_channels(messages, tools=tools, add_generation_prompt=True)
-out = model.generate(input_ids=enc["input_ids"].cuda(), attention_mask=torch.ones_like(enc["input_ids"]).cuda(),
-                     token_channels=enc["token_channels"].cuda(), max_new_tokens=200, do_sample=False)
+model, tokenizer = load_gated_model("imperial-cpg/hos-gpt-oss-20b", device="cuda:0")
 ```
 
-`token_channels=None` runs the base model bit-exactly. `demos/hf_generate.py` is the full
-version: it renders a chat with an injected tool result, prints the per-token channels, and
-generates gated and ungated. Llama-70B needs `--device auto` on 4 x 80 GB.
+The loader downloads the gates and the corresponding base model. Use `device="auto"` to distribute a model across GPUs.
 
-Or directly on the model classes:
+Available models:
 
-```python
-from heads_of_security.attention_gating import GptOssGatedForCausalLM, LlamaGatedForCausalLM
-m = GptOssGatedForCausalLM.from_gates("gates/gpt-oss-20b/lr0.1/gates.safetensors",
-                                      base_model="openai/gpt-oss-20b", dtype=torch.bfloat16, device_map="cuda:0")
-```
+| Model ID | Base model | 
+| --- | --- | 
+| `imperial-cpg/hos-gpt-oss-20b` | GPT-OSS-20B 
+| `imperial-cpg/hos-llama-3.3-70b-instruct` | Llama-3.3-70B-Instruct |
 
-**vLLM:**
+See the [introduction notebook](demos/introduction.ipynb) for a complete example of preparing messages, assigning trust channels, and generating responses. To install the notebook dependencies:
 
 ```bash
-python -m heads_of_security.vllm_gates.build_snapshot \
-    --gates gates/gpt-oss-20b/lr0.1/gates.safetensors --model openai/gpt-oss-20b --out ~/gated_snapshots/gptoss20b-gated
-python -m heads_of_security.vllm_gates.server --snapshot ~/gated_snapshots/gptoss20b-gated \
-    --family gptoss --base-model openai/gpt-oss-20b --port 8000
+uv sync --extra demos
 ```
 
-The server speaks the OpenAI chat-completions API. Tool results (`role: tool`) are labelled
-untrusted, everything else trusted, exactly as during training. Requesting model
-`<model-name>-vanilla` on the same server drops the channel tape and returns the base model.
-`demos/build_and_serve_vllm.sh gptoss|llama` wraps both steps and shows a `curl` example.
-vLLM serving requires `enforce_eager` and prefix caching off (the channel tape is republished
-per step, and channels are not a function of the tokens); the server sets both.
+## vLLM example
 
-## Gate file format
-
-A gates file is a plain `safetensors` shard with only gate parameters:
-
-```
-model.layers.{i}.self_attn.head_gates   float32 [C, C, H]   query channel x key channel x head
-model.layers.{i}.self_attn.sink_gates   float32 [C, H]      gpt-oss only
-```
-
-The loaders infer the channel count from the shape and `gating_sink` from the presence of
-`sink_gates`; nothing else is needed. See `gates/README.md` for the five released files, the
-training recipe, and what each does to attention.
-
-## Tests
+Install vLLM and run the demo on a GPU machine:
 
 ```bash
+uv sync --extra vllm
+bash demos/build_and_serve_vllm.sh gptoss
+```
+
+For Llama, replace `gptoss` with `llama` (uses four GPUs by default).
+
+The [demo script](demos/build_and_serve_vllm.sh) builds the gated model and starts an OpenAI-compatible API on port 8000. It includes a sample request. The server assigns trust channels automatically, treating tool results as untrusted data.
+
+## Repository structure and tests
+
+```text
+src/heads_of_security/
+  attention_gating/   Transformers models, tokenizers, and gate loading
+  vllm_gates/         vLLM integration and server
+  serve/             Message formatting and tool-call parsing
+gates/              Trained gate files
+demos/              Notebooks and serving example
+tests/              Tests for gating, tokenizers, loading, and generation
+```
+
+Run the tests:
+
+```bash
+uv sync --extra dev
 uv run pytest
 ```
 
-All tests run on CPU with tiny randomly-initialised configs (the tokenizer tests download the
-two base tokenizers). They check, for both architectures: bit-exact identity to the base
-model with `token_channels=None` and with open gates; training-path vs inference-path
-equivalence of the gate operator; KV-cache / `generate()` consistency; the sink gate and
-sliding-window handling on gpt-oss; channel alignment under static caches; the `from_gates`
-loader; and byte-parity of the channel tokenizers with the stock chat templates.
+Tests use small models on CPU. Tokenizer tests download the base model tokenizers.
 
-## License
+## Method summary
 
-MIT, see `LICENSE`.
+![Heads of Security method diagram](heads_of_security_diagram.png)
+
+Each token is assigned to one of three channels: trusted instructions and conversation, untrusted tool results, or chat-template formatting. Learned gates in each attention head control how much tokens in one channel attend to tokens in another.
+
+Only the gates are trained; the base model stays frozen. Training favors responses that follow the user's task over responses that follow injected instructions. This teaches the gates to reduce the influence of malicious instructions in untrusted data.
+
+See [the gate documentation](gates/README.md) for training and file details.

@@ -30,6 +30,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from safetensors.torch import load_file
+from transformers.utils import logging as hf_logging
 
 logger = logging.getLogger(__name__)
 
@@ -337,7 +338,14 @@ class GatedCausalLMMixin:
         if "gating_sink" in inferred:
             config.gating_sink = inferred["gating_sink"]
 
-        model = cls.from_pretrained(base_model, config=config, **kwargs)
+        # The base checkpoint has no gates, so transformers reports them as MISSING;
+        # they are loaded from `gates` just below, so silence that report.
+        verbosity = hf_logging.get_verbosity()
+        hf_logging.set_verbosity_error()
+        try:
+            model = cls.from_pretrained(base_model, config=config, **kwargs)
+        finally:
+            hf_logging.set_verbosity(verbosity)
         incompatible = model.load_state_dict(gates, strict=False)
         # strict=False is required (the base weights are absent from `gates`), but it also
         # makes a gate tensor with no home a no-op. Nothing in `gates` may go unclaimed.

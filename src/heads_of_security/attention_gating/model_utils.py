@@ -1,10 +1,17 @@
-"""Model-loading helpers: build a gated model + channel tokenizer from a gates file."""
+"""Model-loading helpers: build a gated model + channel tokenizer from released gates.
+
+``load_gated_model`` takes a Hub repo id (the repo names its own base model);
+``load_gated_model_local`` takes a gates file plus an explicit base model.
+"""
 
 from __future__ import annotations
 
+import json
 from typing import Optional
 
 import torch
+from huggingface_hub import hf_hub_download
+from huggingface_hub.errors import EntryNotFoundError
 from transformers import AutoConfig
 
 from heads_of_security.attention_gating import (
@@ -46,7 +53,45 @@ def _layer_device_map(num_layers: int, num_gpus: int) -> dict[str, int]:
     return device_map
 
 
+GATES_FILE = "gates.safetensors"
+GATES_CONFIG_FILE = "gates_config.json"
+
+
 def load_gated_model(
+    repo_id: str,
+    device: str = "cuda:0",
+    *,
+    untrusted_roles: Optional[list[str]] = None,
+    untrusted_inline_roles: Optional[list[str]] = None,
+):
+    """Load released gates from the Hub, e.g. ``load_gated_model("imperial-cpg/hos-gpt-oss-20b")``.
+
+    The repo holds ``gates.safetensors`` and a ``gates_config.json`` naming the base
+    model, which is fetched and gated. ``untrusted_roles`` are the roles whose whole
+    message is untrusted (default ``tool``/``ipython``, as in training);
+    ``untrusted_inline_roles`` are roles inlined into the open turn as untrusted
+    content (default ``input``). For a local gates file, a different base model, or
+    the full tokenizer policy, use ``load_gated_model_local``.
+    """
+    try:
+        config_path = hf_hub_download(repo_id, GATES_CONFIG_FILE)
+    except EntryNotFoundError as e:
+        raise ValueError(
+            f"{repo_id!r} has no {GATES_CONFIG_FILE}: not a heads-of-security gates repo "
+            "(use load_gated_model_local for a bare gates file)"
+        ) from e
+    with open(config_path) as f:
+        base_model = json.load(f)["base_model"]
+    return load_gated_model_local(
+        hf_hub_download(repo_id, GATES_FILE),
+        base_model,
+        device,
+        untrusted_header_roles=untrusted_roles,
+        untrusted_inline_roles=untrusted_inline_roles,
+    )
+
+
+def load_gated_model_local(
     gates: str,
     model: str,
     device: str = "cuda:0",
@@ -56,7 +101,7 @@ def load_gated_model(
     chat_template_channel: Optional[bool] = None,
     role_remap: Optional[dict[str, str]] = None,
 ):
-    """Load a gated model from a trained gates safetensors file.
+    """Load a gated model from a local gates safetensors file on top of ``model``.
 
     Dispatches to the gated class for ``model``'s ``model_type`` (Llama or gpt-oss).
     Policy kwargs (role lists, ``chat_template_channel``, ``role_remap``) default to
