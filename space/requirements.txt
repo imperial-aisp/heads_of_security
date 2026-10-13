@@ -1,0 +1,4 @@
+heads-of-security==0.1.0
+torch==2.13.0
+# transformers 5.9 needs kernels <0.13 for MXFP4; newer releases fail when loading the kernel.
+kernels>=0.12.0,<0.13
