@@ -112,8 +112,13 @@ details.hos[open] > summary .hos-pill::after {content:" \\25BE";}
 .hos-call-user {background:#dcfce7;border-color:#22c55e;color:#14532d;}
 .hos-call-attacker {background:#fee2e2;border-color:#ef4444;color:#7f1d1d;}
 .hos-tokens {font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.8em;line-height:1.7;
-             white-space:pre-wrap;word-break:break-word;max-height:820px;overflow-y:auto;margin-top:6px;
+             white-space:pre-wrap;word-break:break-word;overflow-y:auto;margin-top:6px;flex:1;min-height:0;
              display:flex;flex-direction:column-reverse;}  /* opens scrolled to the end of the prompt */
+/* The raw input fills the right column without adding to its height, so it matches the
+   conversation column and scrolls inside. */
+#raw-title {flex-grow:0 !important;}
+#raw-input {flex:1 1 0;min-height:360px;position:relative !important;overflow:hidden;}
+.hos-raw {position:absolute;inset:0;display:flex;flex-direction:column;}
 .hos-footer {font-size:0.75em;opacity:0.65;}
 #tool-response textarea {background:#ffffff !important;color:#111827 !important;
                          font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.85em;}
@@ -194,7 +199,10 @@ def render_channels(s: dict, tool_response: str) -> str:
         f'{esc(tok.base.decode([i])).replace(chr(10), "↵" + chr(10))}</span>'
         for i, c in zip(ids, chans)
     )
-    return f'<div class="hos-footer">{len(ids)} tokens</div><div style="margin-top:4px">{legend}</div><div class="hos-tokens"><div>{spans}</div></div>'
+    return (
+        f'<div class="hos-raw"><div class="hos-footer">{len(ids)} tokens</div><div style="margin-top:4px">{legend}</div>'
+        f'<div class="hos-tokens"><div>{spans}</div></div></div>'
+    )
 
 
 def render_output(s: dict, text: str, *, done: bool, seconds: float = 0.0, n_tokens: int = 0) -> str:
@@ -319,7 +327,7 @@ first = SCENARIOS[0]
 with gr.Blocks() as demo:
     gr.Markdown(INTRO)
     scenario = gr.Dropdown([s["title"] for s in SCENARIOS], value=first["title"], label="Scenario")
-    with gr.Row(equal_height=False):
+    with gr.Row(equal_height=True):
         with gr.Column(scale=1):
             gr.Markdown("### Conversation")
             context = gr.HTML(render_context(first))
@@ -330,8 +338,8 @@ with gr.Blocks() as demo:
                 restore = gr.Button("Reset", size="sm")
                 run = gr.Button("Run", variant="primary")
         with gr.Column(scale=1):
-            gr.Markdown("### Raw model input")
-            channels = gr.HTML(render_channels(first, original_response(first["title"])))
+            gr.Markdown("### Raw model input", elem_id="raw-title")
+            channels = gr.HTML(render_channels(first, original_response(first["title"])), elem_id="raw-input")
     with gr.Row(equal_height=False):
         with gr.Column():
             gr.Markdown("### Base GPT-OSS-20B")
