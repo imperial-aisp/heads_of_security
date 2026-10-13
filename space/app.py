@@ -91,6 +91,14 @@ CSS = """
           white-space:pre-wrap;word-break:break-word;}
 .hos-mono {font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.85em;}
 .hos-muted {opacity:0.8;}
+.hos-card {display:block;width:100%;box-sizing:border-box;background:#f3f4f6;color:#111827;
+           border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;margin:0 0 10px 0;}
+.hos-card-body {white-space:pre-wrap;word-break:break-word;margin-top:6px;}
+.hos-card-tools {margin-top:10px;padding-top:8px;border-top:1px solid #d1d5db;}
+details.hos-card > summary {list-style:none;cursor:pointer;}
+details.hos-card > summary::-webkit-details-marker {display:none;}
+details.hos-card > summary .hos-pill::after {content:" \\25B8";}
+details.hos-card[open] > summary .hos-pill::after {content:" \\25BE";}
 details.hos {margin-bottom:12px;}
 details.hos > summary {list-style:none;cursor:pointer;}
 details.hos > summary::-webkit-details-marker {display:none;}
@@ -109,9 +117,10 @@ details.hos[open] > summary .hos-pill::after {content:" \\25BE";}
 .dark .hos-pill-neutral {background:#374151;color:#e5e7eb;}
 .dark .hos-pill-trusted {background:#14532d;color:#dcfce7;}
 .dark .hos-pill-untrusted {background:#7f1d1d;color:#fee2e2;}
-.dark .hos-box, .dark .hos-call {background:#1f2937;color:#e5e7eb;border-color:#4b5563;}
+.dark .hos-box, .dark .hos-call, .dark .hos-card {background:#1f2937;color:#e5e7eb;border-color:#4b5563;}
 .dark .hos-call-user {background:#14532d;border-color:#22c55e;color:#dcfce7;}
 .dark .hos-call-attacker {background:#7f1d1d;border-color:#ef4444;color:#fee2e2;}
+.dark .hos-card-tools {border-color:#4b5563;}
 .dark #tool-response textarea {background:#0b0f19 !important;color:#f9fafb !important;}
 """
 
@@ -152,17 +161,13 @@ def render_context(s: dict) -> str:
     )
     call = assistant["tool_calls"][0]["function"]
     return (
-        collapsible(
-            pill("System prompt · trusted", "trusted"),
-            f'<div class="hos-box">{esc(system["content"])}</div>'
-            f'<div class="hos-box"><div style="margin-bottom:4px"><b>{len(s["tools"])} tools available</b></div>{tools}</div>',
-        )
-        + pill("User · trusted", "trusted")
-        + f'<div class="hos-box">{esc(user["content"])}</div>'
-        + collapsible(
-            pill(f"Assistant · calls {call['name']}"),
-            f'<div class="hos-box hos-mono">{esc(format_call(call["name"], call["arguments"]))}</div>',
-        )
+        f'<details class="hos-card"><summary>{pill("System prompt · trusted", "trusted")}</summary>'
+        f'<div class="hos-card-body">{esc(system["content"])}</div>'
+        f'<div class="hos-card-tools"><div style="margin-bottom:4px"><b>{len(s["tools"])} tools available</b></div>{tools}</div>'
+        "</details>"
+        + f'<div class="hos-card">{pill("User · trusted", "trusted")}<div class="hos-card-body">{esc(user["content"])}</div></div>'
+        + f'<details class="hos-card"><summary>{pill("Assistant · calls " + call["name"])}</summary>'
+        f'<div class="hos-card-body hos-mono">{esc(format_call(call["name"], call["arguments"]))}</div></details>'
         + pill(f"Tool response from {s['messages'][-1]['name']} · untrusted", "untrusted")
     )
 
