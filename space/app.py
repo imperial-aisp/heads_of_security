@@ -97,8 +97,11 @@ CSS = """
 .hos-card-tools {margin-top:10px;padding-top:8px;border-top:1px solid #d1d5db;}
 details.hos-card > summary {list-style:none;cursor:pointer;}
 details.hos-card > summary::-webkit-details-marker {display:none;}
-details.hos-card > summary .hos-pill::after {content:" \\25B8";}
-details.hos-card[open] > summary .hos-pill::after {content:" \\25BE";}
+details.hos-card > summary .hos-head::after {content:" \\25B8";}
+details.hos-card[open] > summary .hos-head::after {content:" \\25BE";}
+.hos-head {font-size:0.85em;font-weight:600;color:#4b5563;}
+.hos-head-trusted {color:#15803d;}
+.hos-head-untrusted {color:#b91c1c;display:block;margin-bottom:4px;}
 details.hos {margin-bottom:12px;}
 details.hos > summary {list-style:none;cursor:pointer;}
 details.hos > summary::-webkit-details-marker {display:none;}
@@ -121,6 +124,9 @@ details.hos[open] > summary .hos-pill::after {content:" \\25BE";}
 .dark .hos-call-user {background:#14532d;border-color:#22c55e;color:#dcfce7;}
 .dark .hos-call-attacker {background:#7f1d1d;border-color:#ef4444;color:#fee2e2;}
 .dark .hos-card-tools {border-color:#4b5563;}
+.dark .hos-head {color:#9ca3af;}
+.dark .hos-head-trusted {color:#4ade80;}
+.dark .hos-head-untrusted {color:#f87171;}
 .dark #tool-response textarea {background:#0b0f19 !important;color:#f9fafb !important;}
 """
 
@@ -133,6 +139,10 @@ CHANNELS = {
 
 def esc(text: str) -> str:
     return html.escape(text)
+
+
+def head(text: str, kind: str = "neutral") -> str:
+    return f'<span class="hos-head hos-head-{kind}">{esc(text)}</span>'
 
 
 def pill(text: str, kind: str = "neutral") -> str:
@@ -161,14 +171,14 @@ def render_context(s: dict) -> str:
     )
     call = assistant["tool_calls"][0]["function"]
     return (
-        f'<details class="hos-card"><summary>{pill("System prompt · trusted", "trusted")}</summary>'
+        f'<details class="hos-card"><summary>{head("System prompt · trusted", "trusted")}</summary>'
         f'<div class="hos-card-body">{esc(system["content"])}</div>'
         f'<div class="hos-card-tools"><div style="margin-bottom:4px"><b>{len(s["tools"])} tools available</b></div>{tools}</div>'
         "</details>"
-        + f'<div class="hos-card">{pill("User · trusted", "trusted")}<div class="hos-card-body">{esc(user["content"])}</div></div>'
-        + f'<details class="hos-card"><summary>{pill("Assistant · calls " + call["name"])}</summary>'
+        + f'<div class="hos-card">{head("User · trusted", "trusted")}<div class="hos-card-body">{esc(user["content"])}</div></div>'
+        + f'<details class="hos-card"><summary>{head("Assistant · calls " + call["name"])}</summary>'
         f'<div class="hos-card-body hos-mono">{esc(format_call(call["name"], call["arguments"]))}</div></details>'
-        + pill(f"Tool response from {s['messages'][-1]['name']} · untrusted", "untrusted")
+        + head(f"Tool response from {s['messages'][-1]['name']} · untrusted", "untrusted")
     )
 
 
