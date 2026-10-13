@@ -87,8 +87,6 @@ CSS = """
 .hos-pill-neutral {background:#e5e7eb;color:#374151;}
 .hos-pill-trusted {background:#dcfce7;color:#166534;}
 .hos-pill-untrusted {background:#fee2e2;color:#991b1b;}
-.hos-box {background:#f3f4f6;color:#111827;border-radius:8px;padding:8px 10px;margin:6px 0 12px 0;
-          white-space:pre-wrap;word-break:break-word;}
 .hos-mono {font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.85em;}
 .hos-muted {opacity:0.8;}
 .hos-card {display:block;width:100%;box-sizing:border-box;background:#f3f4f6;color:#111827;
@@ -101,14 +99,8 @@ details.hos-card > summary .hos-head::after {content:" \\25B8";}
 details.hos-card[open] > summary .hos-head::after {content:" \\25BE";}
 .hos-head {font-size:0.85em;font-weight:600;color:#4b5563;}
 .hos-head-trusted {color:#15803d;}
-.hos-head-untrusted {color:#b91c1c;display:block;margin-bottom:4px;}
-details.hos {margin-bottom:12px;}
-details.hos > summary {list-style:none;cursor:pointer;}
-details.hos > summary::-webkit-details-marker {display:none;}
-details.hos > summary .hos-pill::after {content:" \\25B8";}
-details.hos[open] > summary .hos-pill::after {content:" \\25BE";}
-.hos-call {border:1px solid #d1d5db;border-radius:8px;padding:8px 10px;margin:6px 0 12px 0;
-           background:#f3f4f6;color:#111827;}
+.hos-head-untrusted {color:#b91c1c;}
+.hos-head-label {display:block;margin-bottom:4px;}
 .hos-call-user {background:#dcfce7;border-color:#22c55e;color:#14532d;}
 .hos-call-attacker {background:#fee2e2;border-color:#ef4444;color:#7f1d1d;}
 .hos-tokens {font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.8em;line-height:1.7;
@@ -125,7 +117,7 @@ details.hos[open] > summary .hos-pill::after {content:" \\25BE";}
 .dark .hos-pill-neutral {background:#374151;color:#e5e7eb;}
 .dark .hos-pill-trusted {background:#14532d;color:#dcfce7;}
 .dark .hos-pill-untrusted {background:#7f1d1d;color:#fee2e2;}
-.dark .hos-box, .dark .hos-call, .dark .hos-card {background:#1f2937;color:#e5e7eb;border-color:#4b5563;}
+.dark .hos-card {background:#1f2937;color:#e5e7eb;border-color:#4b5563;}
 .dark .hos-call-user {background:#14532d;border-color:#22c55e;color:#dcfce7;}
 .dark .hos-call-attacker {background:#7f1d1d;border-color:#ef4444;color:#fee2e2;}
 .dark .hos-card-tools {border-color:#4b5563;}
@@ -147,15 +139,8 @@ def esc(text: str) -> str:
 
 
 def head(text: str, kind: str = "neutral") -> str:
-    return f'<span class="hos-head hos-head-{kind}">{esc(text)}</span>'
-
-
-def pill(text: str, kind: str = "neutral") -> str:
-    return f'<span class="hos-pill hos-pill-{kind}">{esc(text)}</span>'
-
-
-def collapsible(summary: str, body: str, *, open_: bool = False) -> str:
-    return f'<details class="hos"{" open" if open_ else ""}><summary>{summary}</summary>{body}</details>'
+    classes = " ".join(f"hos-head-{k}" for k in kind.split())
+    return f'<span class="hos-head {classes}">{esc(text)}</span>'
 
 
 def format_call(name: str, args) -> str:
@@ -183,7 +168,7 @@ def render_context(s: dict) -> str:
         + f'<div class="hos-card">{head("User · trusted", "trusted")}<div class="hos-card-body">{esc(user["content"])}</div></div>'
         + f'<details class="hos-card"><summary>{head("Assistant · calls " + call["name"])}</summary>'
         f'<div class="hos-card-body hos-mono">{esc(format_call(call["name"], call["arguments"]))}</div></details>'
-        + head(f"Tool response from {s['messages'][-1]['name']} · untrusted", "untrusted")
+        + head(f"Tool response from {s['messages'][-1]['name']} · untrusted", "untrusted label")
     )
 
 
@@ -210,17 +195,19 @@ def render_output(s: dict, text: str, *, done: bool, seconds: float = 0.0, n_tok
     parts = []
     if parsed["reasoning"]:
         parts.append(
-            collapsible(pill("Reasoning"), f'<div class="hos-box hos-muted">{esc(parsed["reasoning"])}</div>', open_=True)
+            f'<details class="hos-card" open><summary>{head("Reasoning")}</summary>'
+            f'<div class="hos-card-body hos-muted">{esc(parsed["reasoning"])}</div></details>'
         )
     for call in parsed["tool_calls"]:
         fn = call["function"]
         kind = "user" if fn["name"] in s["user_tools"] else "attacker" if fn["name"] in s["attacker_tools"] else "other"
+        tone = {"user": "trusted", "attacker": "untrusted"}.get(kind, "neutral")
         parts.append(
-            pill("Tool call")
-            + f'<div class="hos-call hos-call-{kind} hos-mono">{esc(format_call(fn["name"], fn["arguments"]))}</div>'
+            f'<div class="hos-card hos-call-{kind}">{head("Tool call", tone)}'
+            f'<div class="hos-card-body hos-mono">{esc(format_call(fn["name"], fn["arguments"]))}</div></div>'
         )
     if parsed["content"]:
-        parts.append(pill("Response") + f'<div class="hos-box">{esc(parsed["content"])}</div>')
+        parts.append(f'<div class="hos-card">{head("Response")}<div class="hos-card-body">{esc(parsed["content"])}</div></div>')
     if not done and not (parsed["tool_calls"] or parsed["content"]):
         parts.append('<div class="hos-footer">thinking…</div>')
     if done:
