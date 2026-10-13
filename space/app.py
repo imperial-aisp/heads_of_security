@@ -100,7 +100,6 @@ details.hos-card[open] > summary .hos-head::after {content:" \\25BE";}
 .hos-head {font-size:0.85em;font-weight:600;color:#4b5563;}
 .hos-head-trusted {color:#15803d;}
 .hos-head-untrusted {color:#b91c1c;}
-.hos-head-label {display:block;margin-bottom:4px;}
 .hos-call-user {background:#dcfce7;border-color:#22c55e;color:#14532d;}
 .hos-call-attacker {background:#fee2e2;border-color:#ef4444;color:#7f1d1d;}
 .hos-tokens {font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.8em;line-height:1.7;
@@ -112,7 +111,17 @@ details.hos-card[open] > summary .hos-head::after {content:" \\25BE";}
 #raw-input {flex:1 1 0;min-height:360px;position:relative !important;overflow:hidden;}
 .hos-raw {position:absolute;inset:0;display:flex;flex-direction:column;}
 .hos-footer {font-size:0.75em;opacity:0.65;}
-#tool-response textarea {background:#ffffff !important;color:#111827 !important;
+#context, #context .html-container {padding:0 !important;}  /* cards line up with the tool response */
+#context .hos-card:last-child {margin-bottom:0;}
+/* The editable tool response is styled as a card like the other roles, on a white background. */
+#tool-response {background:#ffffff !important;border:1px solid #d1d5db !important;border-radius:8px !important;
+                padding:8px 12px !important;box-shadow:none !important;}
+#tool-response:focus-within {border-color:#ef4444 !important;}
+.form:has(> #tool-response) {border:none !important;background:none !important;box-shadow:none !important;}
+#tool-response label > span:first-child {font-size:0.85em;font-weight:600;color:#4b5563;margin-bottom:6px;}
+#tool-response label > span:first-child::after {content:"untrusted";margin-left:0.3em;color:#b91c1c;}
+#tool-response textarea {background:transparent !important;color:#111827 !important;border:none !important;
+                         box-shadow:none !important;padding:0 !important;
                          font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.85em;}
 .dark .hos-pill-neutral {background:#374151;color:#e5e7eb;}
 .dark .hos-pill-trusted {background:#14532d;color:#dcfce7;}
@@ -124,7 +133,11 @@ details.hos-card[open] > summary .hos-head::after {content:" \\25BE";}
 .dark .hos-head {color:#9ca3af;}
 .dark .hos-head-trusted {color:#4ade80;}
 .dark .hos-head-untrusted {color:#f87171;}
-.dark #tool-response textarea {background:#0b0f19 !important;color:#f9fafb !important;}
+.dark #tool-response {background:#0b0f19 !important;border-color:#4b5563 !important;}
+.dark #tool-response:focus-within {border-color:#ef4444 !important;}
+.dark #tool-response label > span:first-child {color:#9ca3af;}
+.dark #tool-response label > span:first-child::after {color:#f87171;}
+.dark #tool-response textarea {color:#f9fafb !important;}
 """
 
 CHANNELS = {
@@ -138,9 +151,10 @@ def esc(text: str) -> str:
     return html.escape(text)
 
 
-def head(text: str, kind: str = "neutral") -> str:
-    classes = " ".join(f"hos-head-{k}" for k in kind.split())
-    return f'<span class="hos-head {classes}">{esc(text)}</span>'
+def head(text: str, kind: str = "neutral", trust: str | None = None) -> str:
+    """A card header; `trust` appends a green "trusted" or red "untrusted" tag."""
+    tag = f' · <span class="hos-head-{trust}">{trust}</span>' if trust else ""
+    return f'<span class="hos-head hos-head-{kind}">{esc(text)}{tag}</span>'
 
 
 def format_call(name: str, args) -> str:
@@ -161,15 +175,18 @@ def render_context(s: dict) -> str:
     )
     call = assistant["tool_calls"][0]["function"]
     return (
-        f'<details class="hos-card"><summary>{head("System prompt · trusted", "trusted")}</summary>'
+        f'<details class="hos-card"><summary>{head("System prompt", trust="trusted")}</summary>'
         f'<div class="hos-card-body">{esc(system["content"])}</div>'
         f'<div class="hos-card-tools"><div style="margin-bottom:4px"><b>{len(s["tools"])} tools available</b></div>{tools}</div>'
         "</details>"
-        + f'<div class="hos-card">{head("User · trusted", "trusted")}<div class="hos-card-body">{esc(user["content"])}</div></div>'
-        + f'<details class="hos-card"><summary>{head("Assistant · calls " + call["name"])}</summary>'
-        f'<div class="hos-card-body hos-mono">{esc(format_call(call["name"], call["arguments"]))}</div></details>'
-        + head(f"Tool response from {s['messages'][-1]['name']} · untrusted", "untrusted label")
+        + f'<div class="hos-card">{head("User", trust="trusted")}<div class="hos-card-body">{esc(user["content"])}</div></div>'
+        + f'<div class="hos-card">{head("Assistant", trust="trusted")}'
+        f'<div class="hos-card-body hos-mono">{esc(format_call(call["name"], call["arguments"]))}</div></div>'
     )
+
+
+def tool_label(s: dict) -> str:
+    return f"Tool response from {s['messages'][-1]['name']} ·"  # CSS appends a red "untrusted"
 
 
 def render_channels(s: dict, tool_response: str) -> str:
@@ -279,7 +296,7 @@ def original_response(title: str) -> str:
 def on_scenario(title):
     s = BY_TITLE[title]
     response = original_response(title)
-    return render_context(s), response, render_channels(s, response), "", ""
+    return render_context(s), gr.Textbox(value=response, label=tool_label(s)), render_channels(s, response), "", ""
 
 
 def on_tool_response(title, tool_response):
@@ -317,9 +334,9 @@ with gr.Blocks() as demo:
     with gr.Row(equal_height=True):
         with gr.Column(scale=1):
             gr.Markdown("### Conversation")
-            context = gr.HTML(render_context(first))
+            context = gr.HTML(render_context(first), elem_id="context")
             tool_response = gr.Textbox(
-                value=original_response(first["title"]), show_label=False, lines=12, max_lines=40, elem_id="tool-response"
+                value=original_response(first["title"]), label=tool_label(first), lines=12, max_lines=40, elem_id="tool-response"
             )
             with gr.Row():
                 restore = gr.Button("Reset", size="sm")
