@@ -163,7 +163,7 @@ def render_context(s: dict) -> str:
             pill(f"Assistant · calls {call['name']}"),
             f'<div class="hos-box hos-mono">{esc(format_call(call["name"], call["arguments"]))}</div>',
         )
-        + pill(f"Tool response from {s['messages'][-1]['name']} · untrusted · editable", "untrusted")
+        + pill(f"Tool response from {s['messages'][-1]['name']} · untrusted", "untrusted")
     )
 
 
@@ -187,7 +187,7 @@ def render_output(s: dict, text: str, *, done: bool, seconds: float = 0.0, n_tok
     parts = []
     if parsed["reasoning"]:
         parts.append(
-            collapsible(pill("Reasoning"), f'<div class="hos-box hos-muted">{esc(parsed["reasoning"])}</div>', open_=not done)
+            collapsible(pill("Reasoning"), f'<div class="hos-box hos-muted">{esc(parsed["reasoning"])}</div>', open_=True)
         )
     for call in parsed["tool_calls"]:
         fn = call["function"]
@@ -278,7 +278,7 @@ def on_tool_response(title, tool_response):
 
 INTRO = f"""# Heads of Security
 
-[Paper]({PAPER_URL}) · [Code]({CODE_URL}) · [Model]({MODEL_URL})
+[Paper]({PAPER_URL}) · [Code]({CODE_URL}) · [Models]({MODEL_URL})
 
 **Heads of Security (HoS)** is a prompt injection defence that enforces instruction-data separation
 through learned per-head attention gates. These gates are trained to redistribute attention between
@@ -312,18 +312,18 @@ with gr.Blocks() as demo:
                 value=original_response(first["title"]), show_label=False, lines=12, max_lines=40, elem_id="tool-response"
             )
             with gr.Row():
-                restore = gr.Button("Restore original", size="sm")
+                restore = gr.Button("Reset", size="sm")
                 run = gr.Button("Run", variant="primary")
         with gr.Column(scale=1):
             gr.Markdown("### Raw model input")
             channels = gr.HTML(render_channels(first, original_response(first["title"])))
     with gr.Row(equal_height=False):
         with gr.Column():
-            gr.Markdown("### With Heads of Security")
-            hos_out = gr.HTML()
-        with gr.Column():
-            gr.Markdown("### Base gpt-oss-20b")
+            gr.Markdown("### Base GPT-OSS-20B")
             base_out = gr.HTML()
+        with gr.Column():
+            gr.Markdown("### GPT-OSS-20B w/ Heads of Security")
+            hos_out = gr.HTML()
     gr.HTML(LEGEND)
 
     scenario.change(on_scenario, scenario, [context, tool_response, channels, hos_out, base_out])
@@ -331,8 +331,8 @@ with gr.Blocks() as demo:
         on_tool_response, [scenario, tool_response], channels, trigger_mode="always_last", show_progress="hidden"
     )
     restore.click(original_response, scenario, tool_response)
-    run.click(run_hos, [scenario, tool_response], hos_out)
     run.click(run_base, [scenario, tool_response], base_out)
+    run.click(run_hos, [scenario, tool_response], hos_out)
 
 if __name__ == "__main__":
     demo.launch(css=CSS)
