@@ -370,6 +370,19 @@ LEGEND = (
     "and medium reasoning effort. Tools are not executed.</div>"
 )
 
+# On huggingface.co the app sits in an iframe that iframe-resizer sizes to the page. It only re-measures
+# on DOM mutations, so layout-only growth while streaming can leave the bottom of the page cut off.
+HEAD = """<script>
+(function () {
+  if (window.parent === window) return;
+  let tries = 0;
+  (function hook() {
+    if (!window.parentIFrame) { if (tries++ < 60) setTimeout(hook, 500); return; }
+    new ResizeObserver(() => window.parentIFrame.size()).observe(document.body);
+  })();
+})();
+</script>"""
+
 first = SCENARIOS[0]
 with gr.Blocks() as demo:
     gr.Markdown(INTRO)
@@ -390,10 +403,10 @@ with gr.Blocks() as demo:
     with gr.Row(equal_height=False):
         with gr.Column():
             gr.Markdown("### Base GPT-OSS-20B")
-            base_out = gr.HTML(elem_id="base-out")
+            base_out = gr.HTML(elem_id="base-out", min_height=120)
         with gr.Column():
             gr.Markdown("### GPT-OSS-20B w/ Heads of Security")
-            hos_out = gr.HTML(elem_id="hos-out")
+            hos_out = gr.HTML(elem_id="hos-out", min_height=120)
     gr.HTML(LEGEND)
 
     scenario.change(on_scenario, scenario, [context, tool_response, channels, hos_out, base_out])
@@ -405,4 +418,4 @@ with gr.Blocks() as demo:
     run.click(run_hos, [scenario, tool_response], hos_out)
 
 if __name__ == "__main__":
-    demo.launch(css=CSS)
+    demo.launch(css=CSS, head=HEAD)
