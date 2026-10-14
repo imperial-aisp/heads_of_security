@@ -386,11 +386,12 @@ HEAD = """<script>
       + document.documentElement.getBoundingClientRect().bottom - wrap.getBoundingClientRect().bottom;  // padding
     return Math.ceil(bottom + below - document.documentElement.getBoundingClientRect().top);
   }
-  let tries = 0, last = 0;
+  let tries = 0;
   (function hook() {
     const contain = document.querySelector(".contain");
     if (!window.parentIFrame || !contain || !contain.children.length) { if (tries++ < 120) setTimeout(hook, 500); return; }
-    const resize = () => { const h = contentHeight(); if (h && h !== last) { last = h; window.parentIFrame.size(h); } };
+    // window.innerHeight is the frame's current height.
+    const resize = () => { const h = contentHeight(); if (h && Math.abs(h - window.innerHeight) > 1) window.parentIFrame.size(h); };
     const ro = new ResizeObserver(resize);
     [...contain.children].forEach((c) => ro.observe(c));
     ro.observe(document.body);
