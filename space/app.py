@@ -97,9 +97,12 @@ details.hos-card > summary {list-style:none;cursor:pointer;}
 details.hos-card > summary::-webkit-details-marker {display:none;}
 details.hos-card > summary .hos-head::after {content:" \\25B8";}
 details.hos-card[open] > summary .hos-head::after {content:" \\25BE";}
-.hos-head {font-size:0.85em;font-weight:600;color:#4b5563;}
-.hos-head-trusted {color:#15803d;}
-.hos-head-untrusted {color:#b91c1c;}
+/* Gradio's `.prose *` rule sets every element's colour, so header colours need !important. */
+.hos-head {font-size:0.85em;font-weight:600;color:#4b5563 !important;}
+.hos-head-trusted {color:#15803d !important;}
+.hos-head-untrusted {color:#b91c1c !important;}
+/* Long reasoning scrolls inside its card, pinned to the newest text, so the tool call stays in view. */
+.hos-scroll {max-height:320px;overflow-y:auto;display:flex;flex-direction:column-reverse;}
 .hos-call-user {background:#dcfce7;border-color:#22c55e;color:#14532d;}
 .hos-call-attacker {background:#fee2e2;border-color:#ef4444;color:#7f1d1d;}
 .hos-tokens {font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.8em;line-height:1.7;
@@ -109,9 +112,11 @@ details.hos-card[open] > summary .hos-head::after {content:" \\25BE";}
    conversation column and scrolls inside. */
 #raw-title {flex-grow:0 !important;}
 #raw-input {flex:1 1 0;min-height:360px;position:relative !important;overflow:hidden;}
-.hos-raw {position:absolute;inset:0;display:flex;flex-direction:column;}
+.hos-raw {position:absolute;inset:0;display:flex;flex-direction:column;box-sizing:border-box;
+          border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;}
 .hos-footer {font-size:0.75em;opacity:0.65;}
-#context, #context .html-container {padding:0 !important;}  /* cards line up with the tool response */
+/* Drop Gradio's inner padding so cards line up with the headings and the tool response. */
+#context, #context .html-container, #base-out .html-container, #hos-out .html-container {padding:0 !important;}
 #context .hos-card:last-child {margin-bottom:0;}
 /* The editable tool response is styled as a card like the other roles, on a white background. */
 #tool-response {background:#ffffff !important;border:1px solid #d1d5db !important;border-radius:8px !important;
@@ -130,9 +135,10 @@ details.hos-card[open] > summary .hos-head::after {content:" \\25BE";}
 .dark .hos-call-user {background:#14532d;border-color:#22c55e;color:#dcfce7;}
 .dark .hos-call-attacker {background:#7f1d1d;border-color:#ef4444;color:#fee2e2;}
 .dark .hos-card-tools {border-color:#4b5563;}
-.dark .hos-head {color:#9ca3af;}
-.dark .hos-head-trusted {color:#4ade80;}
-.dark .hos-head-untrusted {color:#f87171;}
+.dark .hos-head {color:#9ca3af !important;}
+.dark .hos-head-trusted {color:#4ade80 !important;}
+.dark .hos-head-untrusted {color:#f87171 !important;}
+.dark .hos-raw {border-color:#4b5563;}
 .dark #tool-response {background:#0b0f19 !important;border-color:#4b5563 !important;}
 .dark #tool-response:focus-within {border-color:#ef4444 !important;}
 .dark #tool-response label > span:first-child {color:#9ca3af;}
@@ -213,7 +219,7 @@ def render_output(s: dict, text: str, *, done: bool, seconds: float = 0.0, n_tok
     if parsed["reasoning"]:
         parts.append(
             f'<details class="hos-card" open><summary>{head("Reasoning")}</summary>'
-            f'<div class="hos-card-body hos-muted">{esc(parsed["reasoning"])}</div></details>'
+            f'<div class="hos-card-body hos-muted hos-scroll"><div>{esc(parsed["reasoning"])}</div></div></details>'
         )
     for call in parsed["tool_calls"]:
         fn = call["function"]
@@ -347,10 +353,10 @@ with gr.Blocks() as demo:
     with gr.Row(equal_height=False):
         with gr.Column():
             gr.Markdown("### Base GPT-OSS-20B")
-            base_out = gr.HTML()
+            base_out = gr.HTML(elem_id="base-out")
         with gr.Column():
             gr.Markdown("### GPT-OSS-20B w/ Heads of Security")
-            hos_out = gr.HTML()
+            hos_out = gr.HTML(elem_id="hos-out")
     gr.HTML(LEGEND)
 
     scenario.change(on_scenario, scenario, [context, tool_response, channels, hos_out, base_out])
