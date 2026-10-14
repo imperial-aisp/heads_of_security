@@ -33,7 +33,7 @@ WEIGHTS = os.environ.get("HOS_WEIGHTS", "mxfp4")
 GPU_SIZE = os.environ.get("HOS_GPU_SIZE", "large")
 PAPER_URL = "https://arxiv.org/abs/XXXX.XXXXX"  # TODO: arXiv link
 CODE_URL = "https://github.com/imperial-aisp/heads_of_security"
-MODEL_URL = f"https://huggingface.co/{GATES_REPO}"
+MODEL_URL = "https://huggingface.co/collections/imperial-cpg/heads-of-security"
 # The prompt states the current date; pin it so outputs don't drift from day to day.
 DATE = "2026-10-13"
 MAX_NEW_TOKENS = 512
@@ -363,11 +363,10 @@ System and user prompts are treated as trusted, while all tool outputs are treat
 """
 
 LEGEND = (
-    '<div class="hos-footer">Tool calls are shown in '
-    '<span class="hos-pill hos-pill-trusted">green</span> when the user\'s task needs them and in '
-    '<span class="hos-pill hos-pill-untrusted">red</span> when the attacker\'s task does. '
-    "Both models share the same weights (the base model has the gates switched off), use greedy decoding "
-    "and medium reasoning effort. Tools are not executed.</div>"
+    '<div class="hos-footer">User-requested tool calls are shown in '
+    '<span class="hos-pill hos-pill-trusted">green</span>, attacker-requested tool calls are '
+    '<span class="hos-pill hos-pill-untrusted">red</span>. '
+    "We use greedy decoding and medium reasoning effort</div>"
 )
 
 # On huggingface.co the app sits in an iframe that iframe-resizer sizes to the page. It only re-measures
