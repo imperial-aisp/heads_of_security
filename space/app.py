@@ -90,21 +90,22 @@ CSS = """
 .hos-mono {font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.85em;}
 .hos-muted {opacity:0.8;}
 .hos-card {display:block;width:100%;box-sizing:border-box;background:#f3f4f6;color:#111827;
-           border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;margin:0 0 10px 0;}
+           border:1px solid #d1d5db !important;border-radius:8px;padding:8px 12px;margin:0 0 10px 0;}
 .hos-card-body {white-space:pre-wrap;word-break:break-word;margin-top:6px;}
-.hos-card-tools {margin-top:10px;padding-top:8px;border-top:1px solid #d1d5db;}
+.hos-card-tools {margin-top:10px;padding-top:8px;border-top:1px solid #d1d5db !important;}
 details.hos-card > summary {list-style:none;cursor:pointer;}
 details.hos-card > summary::-webkit-details-marker {display:none;}
 details.hos-card > summary .hos-head::after {content:" \\25B8";}
 details.hos-card[open] > summary .hos-head::after {content:" \\25BE";}
-/* Gradio's `.prose *` rule sets every element's colour, so header colours need !important. */
+/* On Spaces, Gradio's resets (`* {border-width:0}`, `.prose * {color}`) load after this CSS,
+   so borders and header colours need !important. */
 .hos-head {font-size:0.85em;font-weight:600;color:#4b5563 !important;}
 .hos-head-trusted {color:#15803d !important;}
 .hos-head-untrusted {color:#b91c1c !important;}
 /* Long reasoning scrolls inside its card, pinned to the newest text, so the tool call stays in view. */
 .hos-scroll {max-height:320px;overflow-y:auto;display:flex;flex-direction:column-reverse;}
-.hos-call-user {background:#dcfce7;border-color:#22c55e;color:#14532d;}
-.hos-call-attacker {background:#fee2e2;border-color:#ef4444;color:#7f1d1d;}
+.hos-call-user {background:#dcfce7;border-color:#22c55e !important;color:#14532d;}
+.hos-call-attacker {background:#fee2e2;border-color:#ef4444 !important;color:#7f1d1d;}
 .hos-tokens {font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:0.8em;line-height:1.7;
              white-space:pre-wrap;word-break:break-word;overflow-y:auto;margin-top:6px;flex:1;min-height:0;
              display:flex;flex-direction:column-reverse;}  /* opens scrolled to the end of the prompt */
@@ -113,7 +114,13 @@ details.hos-card[open] > summary .hos-head::after {content:" \\25BE";}
 #raw-title {flex-grow:0 !important;}
 #raw-input {flex:1 1 0;min-height:360px;position:relative !important;overflow:hidden;}
 .hos-raw {position:absolute;inset:0;display:flex;flex-direction:column;box-sizing:border-box;
-          border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;}
+          border:1px solid #d1d5db !important;border-radius:8px;padding:8px 12px;}
+.hos-links {display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 8px 0;}
+.hos-links a {display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid #d1d5db !important;
+              border-radius:8px;text-decoration:none !important;font-weight:600;font-size:0.9em;color:#111827 !important;}
+.hos-links a:hover {background:#f3f4f6;}
+.dark .hos-links a {border-color:#4b5563 !important;color:#e5e7eb !important;}
+.dark .hos-links a:hover {background:#1f2937;}
 .hos-footer {font-size:0.75em;opacity:0.65;}
 /* Drop Gradio's inner padding so cards line up with the headings and the tool response. */
 #context, #context .html-container, #base-out .html-container, #hos-out .html-container {padding:0 !important;}
@@ -131,14 +138,14 @@ details.hos-card[open] > summary .hos-head::after {content:" \\25BE";}
 .dark .hos-pill-neutral {background:#374151;color:#e5e7eb;}
 .dark .hos-pill-trusted {background:#14532d;color:#dcfce7;}
 .dark .hos-pill-untrusted {background:#7f1d1d;color:#fee2e2;}
-.dark .hos-card {background:#1f2937;color:#e5e7eb;border-color:#4b5563;}
-.dark .hos-call-user {background:#14532d;border-color:#22c55e;color:#dcfce7;}
-.dark .hos-call-attacker {background:#7f1d1d;border-color:#ef4444;color:#fee2e2;}
-.dark .hos-card-tools {border-color:#4b5563;}
+.dark .hos-card {background:#1f2937;color:#e5e7eb;border-color:#4b5563 !important;}
+.dark .hos-call-user {background:#14532d;border-color:#22c55e !important;color:#dcfce7;}
+.dark .hos-call-attacker {background:#7f1d1d;border-color:#ef4444 !important;color:#fee2e2;}
+.dark .hos-card-tools {border-color:#4b5563 !important;}
 .dark .hos-head {color:#9ca3af !important;}
 .dark .hos-head-trusted {color:#4ade80 !important;}
 .dark .hos-head-untrusted {color:#f87171 !important;}
-.dark .hos-raw {border-color:#4b5563;}
+.dark .hos-raw {border-color:#4b5563 !important;}
 .dark #tool-response {background:#0b0f19 !important;border-color:#4b5563 !important;}
 .dark #tool-response:focus-within {border-color:#ef4444 !important;}
 .dark #tool-response label > span:first-child {color:#9ca3af;}
@@ -309,9 +316,39 @@ def on_tool_response(title, tool_response):
     return render_channels(BY_TITLE[title], tool_response)
 
 
+# Octicons (MIT): file, mark-github and package.
+ICON_PAPER = (
+    '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M2 1.75C2 .784 '
+    "2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 "
+    "16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 "
+    ".25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"
+    '"/></svg>'
+)
+ICON_CODE = (
+    '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 '
+    "8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82"
+    "-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-"
+    "3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 "
+    "1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 "
+    "1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
+    '"/></svg>'
+)
+ICON_MODELS = (
+    '<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="m8.878.392 5.25 '
+    "3.045c.54.314.872.89.872 1.514v6.098a1.75 1.75 0 0 1-.872 1.514l-5.25 3.045a1.75 1.75 0 0 1-1.756 0l-5.25-3.045A1.75 "
+    "1.75 0 0 1 1 11.049V4.951c0-.624.332-1.201.872-1.514L7.122.392a1.75 1.75 0 0 1 1.756 0ZM7.875 1.69l-4.63 2.685L8 "
+    "7.133l4.755-2.758-4.63-2.685a.248.248 0 0 0-.25 0ZM2.5 5.677v5.372c0 .09.047.171.125.216l4.625 2.683V8.432Zm6.25 "
+    "8.271 4.625-2.683a.25.25 0 0 0 .125-.216V5.677L8.75 8.432Z"
+    '"/></svg>'
+)
+LINKS = '<div class="hos-links">' + "".join(
+    f'<a href="{url}" target="_blank" rel="noopener">{icon}<span>{label}</span></a>'
+    for url, icon, label in [(PAPER_URL, ICON_PAPER, "Paper"), (CODE_URL, ICON_CODE, "Code"), (MODEL_URL, ICON_MODELS, "Models")]
+) + "</div>"
+
 INTRO = f"""# Heads of Security
 
-[Paper]({PAPER_URL}) · [Code]({CODE_URL}) · [Models]({MODEL_URL})
+{LINKS}
 
 **Heads of Security (HoS)** is a prompt injection defence that enforces instruction-data separation
 through learned per-head attention gates. These gates are trained to redistribute attention between
