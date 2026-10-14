@@ -371,14 +371,30 @@ LEGEND = (
 )
 
 # On huggingface.co the app sits in an iframe that iframe-resizer sizes to the page. It only re-measures
-# on DOM mutations, so layout-only growth while streaming can leave the bottom of the page cut off.
+# on DOM mutations, so layout-only growth while streaming can leave the bottom of the page cut off. It also
+# can't shrink the frame: Gradio's main container stretches to fill the frame, so a measured page is never
+# shorter than the frame. We measure the content itself (the container's children, which don't stretch) plus
+# the footer, and set that height whenever the content changes size.
 HEAD = """<script>
 (function () {
   if (window.parent === window) return;
-  let tries = 0;
+  function contentHeight() {
+    const contain = document.querySelector(".contain"), wrap = contain && contain.parentElement;
+    if (!contain || !contain.children.length) return null;
+    const bottom = Math.max(...[...contain.children].map((c) => c.getBoundingClientRect().bottom));
+    const below = wrap.getBoundingClientRect().bottom - contain.getBoundingClientRect().bottom  // footer
+      + document.documentElement.getBoundingClientRect().bottom - wrap.getBoundingClientRect().bottom;  // padding
+    return Math.ceil(bottom + below - document.documentElement.getBoundingClientRect().top);
+  }
+  let tries = 0, last = 0;
   (function hook() {
-    if (!window.parentIFrame) { if (tries++ < 60) setTimeout(hook, 500); return; }
-    new ResizeObserver(() => window.parentIFrame.size()).observe(document.body);
+    const contain = document.querySelector(".contain");
+    if (!window.parentIFrame || !contain || !contain.children.length) { if (tries++ < 120) setTimeout(hook, 500); return; }
+    const resize = () => { const h = contentHeight(); if (h && h !== last) { last = h; window.parentIFrame.size(h); } };
+    const ro = new ResizeObserver(resize);
+    [...contain.children].forEach((c) => ro.observe(c));
+    ro.observe(document.body);
+    resize();
   })();
 })();
 </script>"""
