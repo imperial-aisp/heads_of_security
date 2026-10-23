@@ -56,6 +56,3 @@ See the [training instructions](../README.md#training-your-own-gates) for setup 
 
 Training saves gates to `runs/<name>/gates/epoch_0.safetensors`. Pass that path to `load_gated_model_local` using the example above.
 
-## File format
-
-Each `safetensors` file stores attention gates for every layer. GPT-OSS files also include attention-sink gates. The loader reads the gate configuration from the file automatically.
