@@ -1,5 +1,7 @@
 # Heads of Security
 
+![Header](hos_header.png)
+
 ## Summary
 
 This repository provides the code and trained gates for **Heads of Security**, a method for enforcing instruction–data separation through learned per-head attention gates. The gates help the model use untrusted data, such as tool results, without following instructions embedded in it.
