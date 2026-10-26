@@ -1,0 +1,213 @@
+---
+import ResultDetails from '../islands/ResultDetails';
+import ResultsOverview from '../figures/ResultsOverview';
+import MultiTurnChart from '../figures/MultiTurnChart';
+import TradeoffGrid from '../figures/TradeoffGrid';
+
+// RL-Hammer on InjecAgent: highest ASR (%) reached by any attacker.
+const RL_HAMMER = [
+  { model: 'GPT-OSS-20B', base: 97, sec: 85, hos: 10 },
+  { model: 'Llama-3.3-70B', base: 99, sec: 82, hos: 1 },
+];
+
+// Paper Table 2. `bold`: indices of the cells bolded in the paper (large drops).
+const MC_BENCHMARKS = [
+  { name: 'ARC-C', shots: ['0-shot'] },
+  { name: 'GSM8K', shots: ['0-shot', '1-shot', '8-shot'] },
+  { name: 'MMLU', shots: ['0-shot', '5-shot'] },
+  { name: 'MMLU-Pro', shots: ['0-shot', '5-shot'] },
+];
+const MC_ROWS = [
+  { name: 'GPT-OSS-20B', vals: ['96.1', '91.4', '93.6', '95.6', '83.0', '82.3', '72.0', '68.3'] },
+  { name: 'w/ SecAlign', vals: ['94.8', '93.3', '70.9', '91.8', '82.8', '54.4', '71.6', '59.4'], bold: [2, 5, 7] },
+  { name: 'w/ ASIDE', vals: ['94.7', '91.3', '93.2', '93.6', '83.2', '74.1', '71.7', '52.1'], bold: [5, 7] },
+  { name: 'w/ HoS (ours)', vals: ['95.4', '90.5', '92.3', '94.6', '83.2', '80.0', '72.3', '67.2'], ours: true },
+  { name: 'Llama-3.3-70B', vals: ['94.5', '93.0', '93.7', '95.7', '84.5', '82.8', '67.8', '56.3'], modelStart: true },
+  { name: 'w/ SecAlign', vals: ['93.8', '92.2', '2.0', '68.0', '84.5', '28.4', '68.6', '16.1'], bold: [2, 3, 5, 7] },
+  { name: 'w/ HoS (ours)', vals: ['93.7', '92.9', '93.2', '95.7', '85.0', '82.4', '67.9', '54.8'], ours: true },
+];
+
+// Paper Table 3 (Llama-3.3-70B): [undefended, w/ SecAlign, w/ HoS] in %. Deltas are relative to the
+// undefended model, green when better and red when worse given the metric's direction.
+const AGENTIC: { benchmark: string; metrics: { metric: string; higherIsBetter: boolean; vals: [number, number, number] }[] }[] = [
+  { benchmark: 'AgentDojo', metrics: [
+    { metric: 'Utility ↑', higherIsBetter: true, vals: [53.7, 67.0, 58.5] },
+    { metric: 'Utility attacked ↑', higherIsBetter: true, vals: [36.2, 63.9, 52.4] },
+    { metric: 'ASR ↓', higherIsBetter: false, vals: [23.1, 2.1, 0.9] },
+  ] },
+  { benchmark: 'AgentDyn', metrics: [
+    { metric: 'Utility ↑', higherIsBetter: true, vals: [33.7, 41.7, 18.3] },
+    { metric: 'Utility attacked ↑', higherIsBetter: true, vals: [30.9, 38.3, 18.4] },
+    { metric: 'ASR ↓', higherIsBetter: false, vals: [18.5, 5.4, 1.4] },
+  ] },
+  { benchmark: 'WASP', metrics: [
+    { metric: 'Utility ↑', higherIsBetter: true, vals: [66.5, 62.7, 62.2] },
+    { metric: 'Utility attacked ↑', higherIsBetter: true, vals: [62.4, 79.8, 81.4] },
+    { metric: 'ASR ↓', higherIsBetter: false, vals: [7.6, 2.4, 1.4] },
+  ] },
+  { benchmark: 'LLMail', metrics: [
+    { metric: 'Utility attacked ↑', higherIsBetter: true, vals: [80.2, 84.6, 82.4] },
+    { metric: 'ASR ↓', higherIsBetter: false, vals: [2.1, 12.7, 0.0] },
+  ] },
+];
+const fmtPct = (v: number) => v.toFixed(1) + '%';
+const delta = (base: number, v: number, higherIsBetter: boolean) => {
+  const d = Math.round((v - base) * 10) / 10;
+  return { text: `(${d > 0 ? '+' : ''}${d.toFixed(1)}%)`, better: higherIsBetter ? d >= 0 : d <= 0 };
+};
+---
+
+<section id="c-results" class="section">
+  <span class="kicker">Results</span>
+  <h2 class="section-title is-narrow">HoS improves security and utility</h2>
+  <div class="lede">
+    Compared to SecAlign and ASIDE, HoS is more robust&nbsp;against adaptive attacks (RL-Hammer and Claudini), better preserves utility across standard capability benchmarks, and achieves strong utility and security on static agentic benchmarks.
+  </div>
+  <figure>
+    <ResultsOverview />
+  </figure>
+
+  <ResultDetails client:load id="c-adaptive" title="Adaptive attacks" summary="HoS holds up against attacks trained or optimized to break it.">
+    <div class="two-col">
+      <div class="block">
+        <h5>RL-Hammer on InjecAgent <span class="h-aside">· black-box</span></h5>
+        <p class="detail-text">We train RL-Hammer attackers to rewrite attacker goals into injections against its target model. Highest ASR reached by any attacker:</p>
+        <div class="scroll-x">
+          <table class="table is-nowrap">
+            <thead>
+              <tr><th>Target model</th><th class="is-num">Undefended</th><th class="is-num">w/ SecAlign</th><th class="is-num is-ours">w/ HoS (ours)</th></tr>
+            </thead>
+            <tbody>
+              {
+                RL_HAMMER.map((r) => (
+                  <tr>
+                    <td>{r.model}</td>
+                    <td class="is-num">{r.base}%</td>
+                    <td class="is-num">{r.sec}%</td>
+                    <td class="is-num"><b>{r.hos}%</b></td>
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="detail-text">For reference, an attacker trained against GPT-5.6-Luna reaches <b>36% on Luna</b>.</p>
+      </div>
+      <div class="block">
+        <h5>Claudini <span class="h-aside">· white-box</span></h5>
+        <p class="detail-text">
+          We start from Claudini’s best optimization-based attack and refine it over 50 autoresearch iterations, specifically against HoS. The attack then optimizes a 120-token suffix, with a budget of 10<sup>17</sup> FLOPs per example. To reach 50% ASR, it needs this much more compute on HoS than on GPT-OSS-20B or its SecAlign variant:
+        </p>
+        <div class="stat-pair">
+          <div class="stat"><span class="num stat-value">2.6–2.7×</span><span class="stat-label">AgentDojo</span></div>
+          <div class="stat"><span class="num stat-value">3.2–3.6×</span><span class="stat-label">InjecAgent</span></div>
+        </div>
+      </div>
+    </div>
+  </ResultDetails>
+
+  <ResultDetails
+    client:load
+    id="c-utility"
+    title="Benign utility"
+    summary="HoS stays close to the base model. SecAlign and ASIDE perform comparably zero-shot, but degrade with few-shot examples and across conversation turns."
+  >
+    <div class="one-col">
+      <div class="block">
+        <h5>Multiple-choice benchmarks</h5>
+        <div class="scroll-x">
+          <table class="table is-nowrap mc-table">
+            <thead>
+              <tr>
+                <th rowspan="2" class="mc-model">Model</th>
+                {
+                  MC_BENCHMARKS.map((b) => (
+                    <th colspan={b.shots.length} class="mc-cell mc-group">
+                      <div class="mc-rule">{b.name}</div>
+                    </th>
+                  ))
+                }
+              </tr>
+              <tr>{MC_BENCHMARKS.flatMap((b) => b.shots).map((s) => <th class="mc-cell">{s}</th>)}</tr>
+            </thead>
+            <tbody>
+              {
+                MC_ROWS.map((r) => (
+                  <tr class:list={[r.ours && 'is-ours', r.modelStart && 'mc-model-start']}>
+                    <td>{r.name.startsWith('w/') ? r.name : <b>{r.name}</b>}</td>
+                    {r.vals.map((v, i) => (
+                      <td class="is-num mc-cell">{r.bold?.includes(i) ? <b>{v}</b> : v}</td>
+                    ))}
+                  </tr>
+                ))
+              }
+            </tbody>
+          </table>
+        </div>
+        <p class="note">
+          Accuracy (%). Bold marks large drops from the undefended model. Every model is within 2 points of the undefended model in zero-shot. We use the standard few-shot in-context learning setup for these benchmarks, but SecAlign often answers a few-shot demonstration rather than the final question.
+        </p>
+      </div>
+      <div class="block">
+        <h5>Multi-turn AlpacaFarm</h5>
+        <p class="detail-text">
+          100 three-turn AlpacaFarm conversations, each with untrusted input in one turn (shaded). Undefended Llama and HoS remain near 100% across turns and placements of untrusted input. SecAlign drops most sharply on the input turn and remains degraded on later fully trusted turns. Instruction-completion rate per turn:
+        </p>
+        <figure class="figure-tight"><MultiTurnChart /></figure>
+        <p class="note">
+          SecAlign shows a similar pattern to its few-shot failures: it continues answering an earlier instruction, treats a later instruction as data for the earlier one, or combines instructions across turns. For example, after a question about Thai food, it ignores an input field specifying chocolate chip cookies and writes a Pad Thai recipe. When next asked why it is a bad idea to give a mouse a cookie, it replies, “Now, let’s get back to cooking” and continues the recipe.
+        </p>
+      </div>
+    </div>
+  </ResultDetails>
+
+  <ResultDetails
+    client:load
+    id="c-agentic"
+    title="Agentic prompt injection benchmarks"
+    summary="Models should complete the user’s task without following injected instructions in tool outputs. On GPT-OSS-20B, HoS Pareto-dominates the SecAlign frontier on AgentDojo and WASP and matches it on AgentDyn and LLMail."
+  >
+    <figure>
+      <TradeoffGrid />
+      <figcaption class="figcap">
+        <p class="caption">
+          Security-utility trade-off for GPT-OSS-20B. Each point is a separately trained model at one learning rate. Both defenses Pareto-dominate the undefended model. ASIDE loses the ability to call tools and stays near-zero utility on all four benchmarks. WASP values are means over five runs due to its small sample size.
+        </p>
+      </figcaption>
+    </figure>
+    <div class="block agentic-block">
+      <h5>Llama-3.3-70B <span class="h-aside">· utility and ASR on agentic benchmarks</span></h5>
+      <div class="scroll-x">
+        <table class="table is-nowrap agentic-table">
+          <thead>
+            <tr><th>Benchmark</th><th>Metric</th><th class="is-num">Llama-3.3-70B</th><th class="is-num">w/ SecAlign</th><th class="is-num is-ours">w/ HoS (ours)</th></tr>
+          </thead>
+          <tbody>
+            {
+              AGENTIC.map((g, gi) =>
+                g.metrics.map((m, mi) => (
+                  <tr class:list={[gi > 0 && mi === 0 && 'group-start', gi < AGENTIC.length - 1 && mi === g.metrics.length - 1 && 'group-end']}>
+                    <td>{mi === 0 ? g.benchmark : ''}</td>
+                    <td>{m.metric}</td>
+                    <td class="is-num undefended">{fmtPct(m.vals[0])}</td>
+                    {m.vals.slice(1).map((v) => {
+                      const d = delta(m.vals[0], v, m.higherIsBetter);
+                      return (
+                        <td class="is-num">
+                          <span class="delta-pair"><span>{fmtPct(v)}</span><span class:list={['delta', d.better ? 'delta-better' : 'delta-worse']}>{d.text}</span></span>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                )),
+              )
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="note">
+        Changes relative to the undefended model in parentheses. HoS brings ASR to 1.4% or less everywhere and matches the undefended model's utility except on AgentDyn. SecAlign raises LLMail ASR: it calls tools in 29.95% of generations even though the user only asks for an email summary, these calls often use fabricated recipients and email bodies and sometimes adopt the attacker-specified values from untrusted emails, resulting in the high ASR.
+      </p>
+    </div>
+  </ResultDetails>
+</section>

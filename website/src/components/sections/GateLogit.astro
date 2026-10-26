@@ -1,0 +1,9 @@
+---
+// g^(ℓ,k) with a trusted-query subscript: T,T (to trusted keys) or T,U (to untrusted keys).
+interface Props {
+  to: 'T' | 'U';
+}
+const { to } = Astro.props;
+---
+
+<i>g</i><span class="eq-idx"><span>(<i>ℓ,k</i>)</span><span><span class="eq-t">T</span>,<span class={to === 'T' ? 'eq-t' : 'eq-u'}>{to}</span></span></span>

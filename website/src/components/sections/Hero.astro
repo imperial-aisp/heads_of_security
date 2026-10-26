@@ -1,0 +1,55 @@
+---
+import { Icon } from '../ds/Icon';
+import Button from '../ds/Button.astro';
+import Wordmark from '../Wordmark.astro';
+import { COLAB_URL, LINKS } from '../../config';
+
+// null forces a line break, so the last three authors start line 2.
+const AUTHORS: ([name: string, affiliations: string] | null)[] = [
+  ['Igor Shilov', '1*'],
+  ['Xiaoxue Yang', '1*'],
+  ['Alexander Panfilov', '2,3,4*'],
+  ['Evgenii Kortukov', '5'],
+  ['Matthieu Meeus', '1'],
+  ['Peter Romov', '1'],
+  null,
+  ['Wojciech Samek', '6'],
+  ['Jonas Geiping', '2,3,4'],
+  ['Yves-Alexandre de Montjoye', '1'],
+];
+const AFFILIATIONS = [
+  'Imperial College London',
+  'ELLIS Institute Tübingen',
+  'Max Planck Institute for Intelligent Systems',
+  'Tübingen AI Center',
+  'Fraunhofer IAIS',
+  'TU Berlin',
+];
+---
+
+<header id="c-top" class="hero">
+  <h1 class="display hero-title wordmark"><Wordmark /></h1>
+  <p class="hero-subtitle">Learned attention gates improve prompt injection robustness</p>
+  <div class="hero-authors">
+    {
+      AUTHORS.map((a) =>
+        a ? (
+          <span>{a[0]}<sup>{a[1]}</sup></span>
+        ) : (
+          <span class="line-break" aria-hidden="true" />
+        ),
+      )
+    }
+  </div>
+  <div class="hero-affiliations">
+    <span><sup>*</sup>Equal contribution</span>
+    {AFFILIATIONS.map((name, i) => <span><sup>{i + 1}</sup>{name}</span>)}
+  </div>
+  <div class="hero-actions">
+    <Button variant="secondary" href={LINKS.paper} external><Icon name="file-text" size={15} />Paper</Button>
+    <Button variant="secondary" href={LINKS.code} external><Icon name="github" size={15} />Code</Button>
+    <Button variant="secondary" href={LINKS.models} external><Icon name="box" size={15} />Models</Button>
+    <Button variant="secondary" href={LINKS.space} external><Icon name="play" size={15} />Live demo</Button>
+    <Button variant="secondary" href={COLAB_URL} external><Icon name="book-open" size={15} />Notebook</Button>
+  </div>
+</header>

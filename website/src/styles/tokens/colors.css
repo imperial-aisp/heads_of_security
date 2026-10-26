@@ -1,0 +1,107 @@
+/* Heads of Security — theme colours.
+   Structure and the gold accent come from Classical; every other hue is a LIGHTER
+   version of a colour extracted from the paper's overview figure (originals live in
+   tokens/figure.css and are reserved for result figures). */
+:root {
+  /* — core (Classical roles on a white ground) — */
+  --color-bg: #ffffff;          /* figure page white */
+  --color-surface: #f7f7f7;     /* figure method-panel grey */
+  --color-surface-2: #e3e3e3;   /* figure gate / softmax pill */
+  --color-text: #222222;        /* lighter version of figure ink #000000 */
+  --color-text-muted: #6b6b6b;  /* lighter version of figure grey #595959 — 5.3:1 on white */
+  --color-accent: #b68235;      /* Classical gold — kept */
+  --color-accent-2: #ac803e;
+  --color-divider: color-mix(in srgb, #222222 16%, transparent);
+  --color-divider-strong: color-mix(in srgb, #222222 32%, transparent);
+
+  /* — neutral ramp (true greys, matching the figure's neutral panels) — */
+  --color-neutral-100: #f7f7f7;
+  --color-neutral-200: #e3e3e3;
+  --color-neutral-300: #d0d0d0;
+  --color-neutral-400: #b3b3b3;
+  --color-neutral-500: #959595;
+  --color-neutral-600: #777777;
+  --color-neutral-700: #595959;
+  --color-neutral-800: #404040;
+  --color-neutral-900: #2a2a2a;
+
+  /* — gold accent ramp (Classical, unchanged) — */
+  --color-accent-100: #fff3e4;
+  --color-accent-200: #ffe3bf;
+  --color-accent-300: #facb8d;
+  --color-accent-400: #e1ad66;
+  --color-accent-500: #c28d41;
+  --color-accent-600: #a06f24;
+  --color-accent-700: #7d5411;
+  --color-accent-800: #5a3b0a;
+  --color-accent-900: #3a270d;
+
+  --color-accent-2-100: #fff3e4;
+  --color-accent-2-200: #ffe3be;
+  --color-accent-2-300: #f5cd96;
+  --color-accent-2-400: #dbaf70;
+  --color-accent-2-500: #bc8f4e;
+  --color-accent-2-600: #9b7232;
+  --color-accent-2-700: #79561f;
+  --color-accent-2-800: #573d14;
+  --color-accent-2-900: #382810;
+
+  /* — pastels: lighter versions of the figure's fills (OKLCH, +35–45% lightness) — */
+  --color-slate: #b9c4d4;    /* lifted from the #8b95a5 GPT-OSS-20B bar */
+  --color-sky: #bcd1ea;      /* ← #a0b8d5 w/ SecAlign bar */
+  --color-apricot: #ffdeae;  /* ← #fbce96 w/ ASIDE bar */
+  --color-green: #75d3a2;    /* ← #1da06a w/ Heads of Security bar */
+  --color-mist: #d4e1f2;     /* ← #c2d1e4 special-token chip (<|start|> user) */
+  --color-mint: #bcefe1;     /* ← #a5e2d1 trusted-token chip (Count, R's) */
+  --color-aqua: #9cecd4;     /* ← #6fd0b5 trusted bracket */
+  --color-peach: #ffd8cc;    /* ← #fdc7b9 untrusted-token chip (Send, money) */
+  --color-coral: #ffc7b5;    /* ← #fda793 untrusted bracket */
+  --color-steel: #9da9b2;    /* ← #5a6771 arrows */
+  --color-pewter: #b8bfc5;   /* ← #858d94 connector lines */
+
+  /* — inks: lighter versions of the figure's text colours, capped at 4.5:1 on white — */
+  --color-forest: #1e8459;     /* ← #158055 "Trusted tokens", 1x, HoS labels */
+  --color-vermilion: #d93411;  /* ← #d42b00 "Untrusted tokens", 0.1x */
+  --color-navy: #4676ae;       /* ← #2d5f98 0.9x */
+  --color-denim: #5276a0;      /* ← #2f547f SecAlign labels */
+  --color-ochre: #cf9240;      /* ← #b9760d ASIDE labels — large text / marks only */
+  --color-slate-ink: #6b7582;  /* ← #66707d GPT-OSS-20B labels */
+
+  /* — deep inks: text on pastel tints (tags, tokens) — all ≥5:1 on their tint — */
+  --color-green-deep: #006d3b;
+  --color-vermilion-deep: #96311d;
+  --color-navy-deep: #275992;
+  --color-ochre-deep: #854600;
+  --color-slate-deep: #4d5969;
+
+  /* — semantic aliases — */
+  --surface-page: var(--color-bg);
+  --surface-panel: var(--color-surface);
+  --surface-pill: var(--color-surface-2);
+  --surface-panel-cool: #f4f6fa;   /* figure "Utility" panel — kept as-is */
+  --surface-panel-warm: #fff6f4;   /* figure "Security" panel — kept as-is */
+  --text-default: var(--color-text);
+  --text-muted: var(--color-text-muted);
+  --text-accent: var(--color-accent-700);
+  --border-default: var(--color-divider);
+  --border-strong: var(--color-divider-strong);
+
+  --color-trusted: var(--color-aqua);
+  --color-trusted-tint: var(--color-mint);
+  --color-trusted-ink: var(--color-forest);
+  --color-trusted-deep: var(--color-green-deep);
+
+  --color-untrusted: var(--color-coral);
+  --color-untrusted-tint: var(--color-peach);
+  --color-untrusted-ink: var(--color-vermilion);
+  --color-untrusted-deep: var(--color-vermilion-deep);
+
+  --color-system: var(--color-sky);
+  --color-system-tint: var(--color-mist);
+  --color-system-ink: var(--color-navy);
+  --color-system-deep: var(--color-navy-deep);
+
+  --color-caution: var(--color-ochre);
+  --color-caution-tint: var(--color-apricot);
+  --color-caution-deep: var(--color-ochre-deep);
+}

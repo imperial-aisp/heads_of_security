@@ -1,0 +1,17 @@
+---
+import Wordmark from '../Wordmark.astro';
+
+const LINKS = [
+  ['#c-method', 'Method'],
+  ['#c-results', 'Results'],
+  ['#c-attention', 'Attention'],
+  ['#c-analysis', 'Analysis'],
+  ['#c-try', 'Try it'],
+  ['#c-cite', 'Cite'],
+];
+---
+
+<nav class="nav site-nav" aria-label="Sections">
+  <a href="#c-top" class="nav-brand"><Wordmark /></a>
+  {LINKS.map(([href, label]) => <a href={href}>{label}</a>)}
+</nav>

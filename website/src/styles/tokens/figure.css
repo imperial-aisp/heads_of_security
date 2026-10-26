@@ -1,0 +1,41 @@
+/* Figure palette — the colours of figure-src/results_overview.tex (the paper's palette), as rendered.
+   Use ONLY inside result figures (charts, legends, attention diagrams) so the website
+   matches the paper exactly. Never use them for interface chrome. */
+:root {
+  /* series — bars, lines, legend swatches */
+  --fig-series-base: #8b95a5;          /* GPT-OSS-20B (cbase) */
+  --fig-series-base-label: #68707c;    /* its bar-value text */
+  --fig-series-secalign: #a5b7d2;      /* w/ SecAlign (bars: csec at 50%) */
+  --fig-series-secalign-line: #9bb0cd; /* w/ SecAlign (line charts: csec at 55%) */
+  --fig-series-secalign-label: #38537c;
+  --fig-series-aside: #f4d09d;         /* w/ ASIDE (caside at 50%) */
+  --fig-series-aside-label: #af792c;
+  --fig-series-hos: #0f9d6e;           /* w/ Heads of Security (ours; cours) */
+  --fig-series-hos-label: #0c7e58;     /* its bar-value text; also the "ours" table headers */
+
+  /* attention diagram — token chips, brackets, multipliers */
+  --fig-token-system: #c2d1e4;     /* <|start|> user / tool / assistant, 0.9x bars */
+  --fig-token-trusted: #a5e2d1;    /* Count, R's */
+  --fig-token-untrusted: #fdc7b9;  /* Send, money */
+  --fig-bracket-trusted: #6fd0b5;
+  --fig-bracket-untrusted: #fda793;
+  --fig-text-trusted: #158055;     /* "Trusted tokens", 1x */
+  --fig-text-untrusted: #d42b00;   /* "Untrusted tokens", 0.1x */
+  --fig-text-system: #2d5f98;      /* 0.9x */
+
+  /* figure ink and linework */
+  --fig-ink: #000000;
+  --fig-ink-muted: #595959;   /* "Attention Scores", gate labels */
+  --fig-arrow: #5a6771;
+  --fig-connector: #858d94;
+
+  /* figure backgrounds — used as-is in the theme too */
+  --fig-bg: #ffffff;
+  --fig-panel: #f7f7f7;            /* method panel */
+  --fig-pill: #e3e3e3;             /* "Apply learned HoS gates", "softmax" */
+  --fig-panel-utility: #f4f6fa;
+  --fig-panel-security: #fff6f4;
+
+  --fig-font: "Roboto", system-ui, sans-serif;
+  --fig-font-mono: "Roboto Mono", ui-monospace, monospace;
+}

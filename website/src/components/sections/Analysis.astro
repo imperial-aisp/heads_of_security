@@ -1,0 +1,72 @@
+---
+import GateHeatmap from '../figures/GateHeatmap';
+import RoleProbeChart from '../figures/RoleProbeChart';
+import GateLogit from './GateLogit.astro';
+import { LINKS } from '../../config';
+---
+
+<section id="c-analysis" class="section">
+  <span class="kicker">Analysis</span>
+  <h2 class="section-title is-narrow">Analyzing the learned attention gates</h2>
+  <p class="lede is-flush">Most heads shift attention away from untrusted content. A minority of heads shift towards it and help the model detect prompt injections.</p>
+
+  <div id="c-gates" class="gates">
+    <figure class="gates-figure">
+      <GateHeatmap height={380} />
+      <figcaption>
+        <p class="caption">Learned attention gates for GPT-OSS-20B. Each cell is one head in one layer and shows Δ<sup>(ℓ,k)</sup>.</p>
+      </figcaption>
+    </figure>
+    <h3 class="analysis-h3">How is attention redistributed?</h3>
+    <p class="body-text is-spaced">For layer <i>ℓ</i> and head <i>k</i>, we measure how much the learned gates shift attention from untrusted to trusted keys:</p>
+    <p class="equation-wrap">
+      <span class="equation">Δ<sup class="eq-sup">(<i>ℓ,k</i>)</sup> = log <i>σ</i><span class="eq-paren">(</span><GateLogit to="T" /><span class="eq-paren">)</span> − log <i>σ</i><span class="eq-paren">(</span><GateLogit to="U" /><span class="eq-paren">)</span></span>
+    </p>
+    <p class="body-text">
+      where <GateLogit to="T" /> and <GateLogit to="U" /> are the gate logits from a <span class="ch ch-trusted">trusted</span> query to <span class="ch ch-trusted">trusted</span> and <span class="ch ch-untrusted">untrusted</span> keys.
+    </p>
+    <p class="body-text is-spaced">
+      Most values are positive: these <span class="heads-red is-strong">red heads</span> reduce their relative attention to untrusted keys, the expected direction for heads involved in instruction following. A minority of <span class="heads-blue is-strong">blue heads</span> instead shift attention toward untrusted content.
+    </p>
+  </div>
+
+  <div id="c-blue" class="blue-heads">
+    <div class="blue-heads-text">
+      <h3 class="analysis-h3">Why do some gates increase attention to untrusted content?</h3>
+      <p class="body-text">We hypothesize that <span class="heads-blue is-strong">blue heads</span> help detect prompt injections.</p>
+      <p class="body-text">
+        On LLMail-Inject, we measure the send rate (following an injection to send an email) and the detection rate (correctly flagging the injection). To isolate each group, we disable the HoS gates on heads of the opposite colour.
+      </p>
+    </div>
+    <div class="blue-heads-table">
+      <h5>LLMail-Inject <span class="h-aside">· GPT-OSS-20B</span></h5>
+      <div class="scroll-x">
+        <table class="table is-nowrap">
+          <thead><tr><th>Model</th><th class="is-num">Send ↓</th><th class="is-num">Detection ↑</th></tr></thead>
+          <tbody>
+            <tr><td>Base</td><td class="is-num">0.86%</td><td class="is-num">11.03%</td></tr>
+            <tr><td><span class="heads-red">Red</span> gates only</td><td class="is-num">0.31%</td><td class="is-num">3.60%</td></tr>
+            <tr><td><span class="heads-blue">Blue</span> gates only</td><td class="is-num">0.32%</td><td class="is-num"><b>28.20%</b></td></tr>
+            <tr class="is-ours"><td>HoS (ours)</td><td class="is-num">0.37%</td><td class="is-num">3.11%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="note">Blue gates raise injection detection to roughly 2.5× the base rate, while red gates alone lower it.</p>
+    </div>
+  </div>
+
+  <div id="c-roles" class="roles">
+    <h3 class="analysis-h3">Role confusion</h3>
+    <p class="body-text">
+      Recent work frames prompt injection as role confusion (<a href={LINKS.roleConfusion} target="_blank" rel="noopener" title="Charles Ye, Jasmine Cui, Dylan Hadfield-Menell. Prompt injection as role confusion. ICML 2026.">Ye et al., ICML 2026</a>): an instruction in the untrusted tool output may be viewed by the model as coming from the user, and thus be erroneously trusted. We apply their role probes (linear probes on hidden activations trained on neutral text wrapped in role tags) to GPT-OSS-20B and its HoS variant on AgentDojo, and show that HoS improves role perception.
+    </p>
+    <figure>
+      <RoleProbeChart />
+      <figcaption class="figcap">
+        <p class="caption">
+          (a) On AgentDojo benign user tasks, GPT-OSS-20B does not correctly perceive tool outputs, while HoS strongly improves the tool role perception across layers. (b) HoS decreases the perceived Userness of the injection tokens inside the tool outputs compared to GPT-OSS-20B.
+        </p>
+      </figcaption>
+    </figure>
+  </div>
+</section>

@@ -1,0 +1,29 @@
+---
+import Base from '../layouts/Base.astro';
+import Nav from '../components/sections/Nav.astro';
+import Hero from '../components/sections/Hero.astro';
+import Method from '../components/sections/Method.astro';
+import Results from '../components/sections/Results.astro';
+import Attention from '../components/sections/Attention.astro';
+import Analysis from '../components/sections/Analysis.astro';
+import TryIt from '../components/sections/TryIt.astro';
+import Cite from '../components/sections/Cite.astro';
+import Footer from '../components/sections/Footer.astro';
+---
+
+<Base
+  title="Heads of Security: Learned Attention Gates Improve Prompt Injection Robustness"
+  description="Heads of Security (HoS) is a prompt injection defense that enforces instruction–data separation with a small set of learned per-head attention gates."
+>
+  <Nav />
+  <main class="page">
+    <Hero />
+    <Method />
+    <Results />
+    <Attention />
+    <Analysis />
+    <TryIt />
+    <Cite />
+  </main>
+  <Footer />
+</Base>

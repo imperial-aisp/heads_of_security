@@ -1,0 +1,17 @@
+---
+// Static (link) counterpart of Button.tsx, for buttons that need no JavaScript.
+import type { HTMLAttributes } from 'astro/types';
+
+interface Props extends HTMLAttributes<'a'> {
+  href: string;
+  variant?: 'primary' | 'secondary' | 'ghost';
+  size?: 'md' | 'sm';
+  /** Open in a new tab. */
+  external?: boolean;
+}
+
+const { href, variant = 'primary', size = 'md', external = false, ...rest } = Astro.props;
+const newTab = external ? { target: '_blank', rel: 'noopener' } : {};
+---
+
+<a class:list={['btn', `btn-${variant}`, size === 'sm' && 'btn-sm']} href={href} {...newTab} {...rest}><slot /></a>

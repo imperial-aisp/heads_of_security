@@ -1,0 +1,42 @@
+---
+import CodeSnippets from '../islands/CodeSnippets';
+import DemoEmbed from '../islands/DemoEmbed';
+import { Icon } from '../ds/Icon';
+import Button from '../ds/Button.astro';
+import { COLAB_URL, DEMO, LINKS, PIP_INSTALL, QUICKSTART } from '../../config';
+---
+
+<section id="c-try" class="section">
+  <span class="kicker">Try it</span>
+  <h2 class="section-title">Try it on a real injection</h2>
+  <p class="lede">Try GPT-OSS-20B and its HoS variant served on Hugging Face, or load the gates into your own code.</p>
+
+  <DemoEmbed client:load spaceUrl={LINKS.space} embedUrl={LINKS.spaceEmbed} height={DEMO.height} autoLoad={DEMO.autoLoad} />
+
+  <div id="c-code" class="code">
+    <h4>Load the gated model</h4>
+    <p class="code-intro">The gates load on top of the unchanged base weights. Mark which tokens are untrusted, then generate as usual.</p>
+    <div class="code-stack">
+      <CodeSnippets
+        client:load
+        snippets={[
+          { key: 'pip', label: 'Install', code: PIP_INSTALL },
+          { key: 'quick', label: 'Python', code: QUICKSTART },
+        ]}
+      />
+      <div class="notebook">
+        <div class="card">
+          <div class="card-kicker">Tutorial notebook</div>
+          <div class="card-title">Load, inspect and visualise the gates</div>
+          <div class="notebook-row">
+            <p class="card-body">How to load a gated model and generate responses, what's in a gates file, and how the gates change attention.</p>
+            <div class="notebook-actions">
+              <Button variant="secondary" size="sm" href={LINKS.demos} external><Icon name="github" size={14} />View on GitHub</Button>
+              <Button variant="ghost" size="sm" href={COLAB_URL} external>Open in Colab<Icon name="external-link" size={14} /></Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

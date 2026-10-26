@@ -1,0 +1,33 @@
+/* Roboto throughout (Classical's scale and rhythm, re-cut in Roboto); Roboto Mono for tokens and code. */
+:root {
+  --font-heading: "Roboto", system-ui, sans-serif;
+  --font-body: "Roboto", system-ui, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-heading-weight: 500;   /* interface headings cap at Medium — Classical's "no bold" rule */
+  --font-display-weight: 300;   /* the bigger the text, the lighter it sets */
+  --font-body-weight: 400;
+  --font-strong-weight: 500;
+
+  --size-display: clamp(44px, 6vw, 80px);
+  --size-h1: 42px;
+  --size-h2: 32px;
+  --size-h3: 25px;
+  --size-h4: 20px;
+  --size-h5: 16px;
+  --size-h6: 13px;
+  --size-body: 15px;
+  --size-body-lg: 17px;
+  --size-small: 13px;
+  --size-caption: 11px;
+  --size-mono: 0.92em;
+
+  --leading-body: 1.55;
+  --leading-heading: 1.12;
+  --leading-display: 1.06;
+  --leading-unit: 28px;   /* the page rhythm (Classical landing) */
+  --leading-half: 14px;
+
+  --tracking-heading: -0.015em;
+  --tracking-display: -0.02em;
+  --tracking-caps: 0.08em;
+}
