@@ -8,6 +8,11 @@ interface Props {
 
 const { title, description } = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site);
+// Link previews and icons: the dog with the Security cap, cut from the header image (see public/).
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/'); // the base path ends with a slash in builds but not in the dev server
+const socialCard = new URL(`${base}social-card.jpg`, Astro.site); // 1200×630: the whole header image
+const socialSquare = new URL(`${base}social-square.jpg`, Astro.site); // 600×600: the dog
+const imageAlt = 'A three-headed dragon; the head that says it will ignore previous instructions is bonked by a dog in a Security cap.';
 ---
 
 <!doctype html>
@@ -22,7 +27,15 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={socialCard} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
     <meta name="twitter:card" content="summary" />
+    <meta name="twitter:image" content={socialSquare} />
+    <meta name="twitter:image:alt" content={imageAlt} />
+    <link rel="icon" type="image/png" sizes="64x64" href={`${base}favicon.png`} />
+    <link rel="apple-touch-icon" sizes="180x180" href={`${base}apple-touch-icon.png`} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
