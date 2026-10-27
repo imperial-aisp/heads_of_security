@@ -24,20 +24,19 @@
   --column-max: 1400px;
   --page-max: calc(min(100vw - 2 * var(--edge), max(66.7vw, 976px), var(--column-max)) + 2 * var(--edge));
 
-  /* Type scale for the page's own text (a step above stolen-thoughts.com's 20px / 32px prose, for the wider
-     column); phones get the smaller values in the media query at the end of this file. */
-  --type-lede: 22px;    --type-lede-lh: 35px;    /* section introductions, method text */
-  --type-body: 21px;    --type-body-lh: 33px;    /* body paragraphs, subsection summaries, abstract */
-  --type-detail: 20px;  --type-detail-lh: 32px;  /* text inside "Show details" */
-  --type-step: 19px;    --type-step-lh: 30px;    /* method steps (narrow columns) */
-  --type-caption: 18px; --type-caption-lh: 28px; /* figure captions, table notes */
-  --type-name: 21px;    --type-name-lh: 31px;    /* hero author names */
-  --type-affil: 18.5px; --type-affil-lh: 28px;   /* hero affiliations */
+  /* Type scale for the page's own text (near stolen-thoughts.com's 20px / 32px prose); phones get the
+     smaller values in the media query at the end of this file. */
+  --type-lede: 20px;    --type-lede-lh: 32px;    /* section introductions, method text */
+  --type-body: 19px;    --type-body-lh: 30px;    /* body paragraphs, subsection summaries, abstract */
+  --type-detail: 18px;  --type-detail-lh: 29px;  /* text inside "Show details" */
+  --type-caption: 16px; --type-caption-lh: 25px; /* figure captions, table notes */
+  --type-name: var(--type-body);   /* hero author names: body size at every width */
+  --type-affil: var(--type-body);  /* hero affiliations: the same */
   /* design-system sizes used by headings, kickers and the abstract */
-  --size-h3: 30px;
-  --size-h4: 24px;
-  --size-h5: 20px;
-  --size-small: 16px;
+  --size-h3: 28px;
+  --size-h4: 22px;
+  --size-h5: 18px;
+  --size-small: 14px;
   --size-body-lg: var(--type-body);
   --leading-unit: var(--type-body-lh);
 }
@@ -49,7 +48,8 @@ a:hover { color: var(--color-accent-800); }
 
 .wordmark b { font-weight: 700; }
 
-/* — nav — */
+/* — nav: the sticky bar at the top (wordmark and resource buttons); on wide screens (below) also a rail of
+   section links floating left of the column — */
 .site-nav {
   position: sticky;
   top: 0;
@@ -58,57 +58,87 @@ a:hover { color: var(--color-accent-800); }
   row-gap: 6px;
   padding-inline: max(var(--edge), calc((100% - var(--page-max)) / 2 + var(--edge)));
 }
+.nav-resources { display: flex; flex-wrap: wrap; gap: 2px; margin-right: calc(-1 * var(--space-1)); } /* the last button's padding ends at the column's edge */
+.nav-resources .btn { font-size: var(--type-body); padding-block: 4px; }
+.btn .logo { display: block; flex: none; }
+.site-rail { display: none; }
 
 /* — page column, sections — */
 .page { max-width: var(--page-max); margin: 0 auto; padding: 0 var(--edge); }
-.section { border-top: 1px solid var(--color-divider); padding: 84px 0; scroll-margin-top: 60px; }
-.section-title { font-size: clamp(32px, 3.4vw, 48px); margin: 0; }
-.section-title.is-narrow { max-width: 24ch; }
-.lede { font-size: var(--type-lede); line-height: var(--type-lede-lh); max-width: 78ch; margin: 14px 0 36px; color: var(--ink-78); }
+
+/* Wide screens: the column moves right by --shift and the section links float in the margin left of it,
+   under the bar, the current section highlighted. */
+@media (min-width: 1360px) {
+  :root { --rail: 168px; --rail-gap: 56px; --shift: 88px; }
+  .page { margin-left: calc((100% - var(--page-max)) / 2 + var(--shift)); }
+  .site-nav { padding-inline: calc((100% - var(--page-max)) / 2 + var(--shift) + var(--edge)) calc((100% - var(--page-max)) / 2 - var(--shift) + var(--edge)); } /* the bar's contents follow the column */
+  .site-rail {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    position: fixed;
+    top: 104px;
+    left: calc((100% - var(--page-max)) / 2 + var(--shift) + var(--edge) - var(--rail-gap) - var(--rail));
+    width: var(--rail);
+    max-height: calc(100vh - 128px);
+    overflow-y: auto;
+    z-index: 10;
+    font-size: var(--type-body);
+  }
+  .site-rail a { color: inherit; text-decoration: none; padding: 3px 0; line-height: 1.25; display: inline-flex; align-items: center; gap: 6px; } /* a long label wraps within the rail */
+  .site-rail .rail-back { color: var(--color-text-muted); padding-bottom: 14px; } /* on the attention page: back to the main page */
+  .site-rail a:hover, .site-rail a[aria-current] { color: var(--color-accent-700); }
+}
+.section { border-top: 1px solid var(--color-divider); padding: 56px 0; scroll-margin-top: 64px; }
+.page-head { padding: 24px 0 40px; } /* the attention page's title block, in place of the hero */
+.section-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.section-title { font-size: clamp(30px, calc(3.4vw - 2px), 46px); margin: 0; }
+.lede { font-size: var(--type-lede); line-height: var(--type-lede-lh); margin: 14px 0 36px; color: var(--ink-78); }
 .lede.is-flush { margin-bottom: 0; }
 .nowrap { flex: none; white-space: nowrap; }
 .scroll-x { overflow-x: auto; }
 
 /* LaTeX \textsc-style channel names */
-.ch { font-variant-caps: small-caps; letter-spacing: 0.03em; font-weight: 500; }
+.ch { font-variant-caps: small-caps; letter-spacing: 0.03em; font-weight: 500; white-space: nowrap; hyphens: manual; } /* a channel name is never split */
 .ch-trusted { color: var(--fig-text-trusted); }
 .ch-untrusted { color: var(--fig-text-untrusted); }
 .ch-template { color: var(--fig-text-system); }
 
 /* body paragraphs are justified with hyphenation, like the captions and the abstract */
-.lede, .method-text, .subsection-summary, .body-text, .step p, .note, .demo-text, .code-intro, .notebook .card-body, .detail-text {
+.lede, .subsection-summary, .body-text, .note, .demo-text, .code-intro, .notebook .card-body, .detail-text {
   text-align: justify; hyphens: auto; text-wrap: pretty;
 }
 
 /* captions */
 figcaption.figcap { margin-top: 18px; }
-.caption { margin: 0; font-size: var(--type-caption); line-height: var(--type-caption-lh); color: var(--color-text-muted); text-align: justify; hyphens: auto; text-wrap: pretty; }
+/* a paper figure narrower than the column is centred, and its caption takes the figure's width, not the column's */
+figure:has(> img.paper-figure) { width: fit-content; max-width: 100%; margin-inline: auto; }
+figure:has(> img.paper-figure) > figcaption { width: min-content; min-width: 100%; } /* the caption follows the figure's width without widening it */
+.caption { margin: 0; font-size: var(--type-body); line-height: var(--type-body-lh); color: var(--color-text-muted); text-align: justify; hyphens: auto; text-wrap: pretty; }
 .caption-lead { color: var(--color-text); font-weight: 500; }
-.note { margin: 0; font-size: var(--type-caption); line-height: var(--type-caption-lh); color: var(--color-text-muted); }
+.note { margin: 0; font-size: var(--type-body); line-height: var(--type-body-lh); color: var(--color-text-muted); }
 
 /* — hero — */
-.hero { padding: 112px 0 84px; scroll-margin-top: 60px; }
-.hero-title { font-size: clamp(52px, 8vw, 96px); margin: 0 0 0 -0.04em; }
-.hero-subtitle { font-size: clamp(24px, 2.6vw, 34px); line-height: 1.3; font-weight: 300; margin: 24px 0 0; max-width: 30ch; }
-.hero-authors { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 40px; font-size: var(--type-name); line-height: var(--type-name-lh); }
-.hero-authors sup { color: var(--color-accent-700); }
+.hero { padding: 24px 0 40px; scroll-margin-top: 64px; }
+.hero-title { font-size: clamp(48px, calc(8vw - 4px), 92px); margin: 0 0 0 -0.04em; }
+.hero-subtitle { font-size: clamp(21px, calc(2.6vw - 3px), 31px); line-height: 1.3; font-weight: 300; margin: 20px 0 0; } /* one line on laptops and up */
+.hero-authors { display: flex; flex-wrap: wrap; gap: 2px 20px; margin-top: 28px; font-size: var(--type-name); line-height: 1.25; }
+.hero-authors sup { color: var(--color-accent-700); line-height: 0; } /* superscripts must not push the rows apart */
 .hero-authors .line-break { flex-basis: 100%; height: 0; }
-.hero-affiliations { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 18px; margin-top: 12px; font-size: var(--type-affil); line-height: var(--type-affil-lh); color: var(--color-text-muted); }
-.hero-notes { margin-top: 8px; }   /* equal contribution / equal advising, on their own line under the affiliations */
+.hero-affiliations { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 18px; margin-top: 10px; font-size: var(--type-affil); line-height: 1.3; color: var(--color-text-muted); }
+.hero-affiliations sup { line-height: 0; }
+.hero-notes { margin-top: 4px; }   /* equal contribution / equal advising, on their own line under the affiliations */
 .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 36px; }
-.hero-strip { margin: 56px 0 0; }
-.hero-strip img { display: block; width: 100%; height: auto; border-radius: var(--radius-md); }
 
 /* — method — */
-.tldr { font-size: clamp(24px, 2.4vw, 32px); line-height: 1.35; font-weight: 300; margin: 0; max-width: 36ch; }
-.method-text { font-size: var(--type-lede); line-height: var(--type-lede-lh); max-width: 78ch; margin: 18px 0 0; color: var(--ink-78); }
+.tldr { font-size: clamp(21px, calc(2.6vw - 3px), 31px); line-height: 1.3; font-weight: 300; margin: 0; } /* set like the hero subtitle, over the full column */
 .abstract-block { margin: 12px 0 40px; }
-.prose.abstract { max-width: none; columns: 2 300px; column-gap: 56px; column-rule: 1px solid var(--color-divider); margin-top: 20px; color: var(--ink-86); }
+/* one column over the full width, at the toggle button's size, and indented like the button's label so the
+   pair reads as one unit */
+.prose.abstract { max-width: none; font-size: 16px; line-height: 1.6; margin-top: 12px; padding-left: 11px; color: var(--ink-86); } /* 11px = the small button's inline padding plus its border */
 .prose.abstract p { margin: 0; }
-.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 28px; margin-top: 48px; }
-.step { border-left: 1px solid var(--color-divider); padding-left: 24px; }
-.step h5 { margin: 0 0 8px; }
-.step p { margin: 0; font-size: var(--type-step); line-height: var(--type-step-lh); color: var(--ink-80); }
+.prose.abstract p + p { margin-top: 0.7em; }
 
 /* — results: collapsible subsections — */
 .subsection { margin-top: 56px; padding-top: 28px; border-top: 1px solid var(--color-divider); scroll-margin-top: 72px; }
@@ -125,12 +155,6 @@ figcaption.figcap { margin-top: 18px; }
 .detail-text { margin: 0; font-size: var(--type-detail); line-height: var(--type-detail-lh); color: var(--ink-80); }
 .detail-note { margin: 0; font-size: var(--type-caption); line-height: var(--type-caption-lh); color: var(--color-text-muted); }
 
-.stat-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--color-divider); border-top: 1px solid var(--color-divider); border-bottom: 1px solid var(--color-divider); margin-top: auto; } /* sits at the bottom of its row, level with the RL-Hammer block */
-.stat { background: var(--color-bg); padding: 18px 16px 18px 0; display: flex; flex-direction: column; gap: 6px; }
-.stat + .stat { padding: 18px 0 18px 16px; }
-.stat-value { font-size: 26px; font-weight: 400; line-height: 1; letter-spacing: -0.01em; color: var(--color-accent-700); }
-.stat-label { font-size: 17px; color: var(--color-text-muted); }
-
 .table.is-nowrap { white-space: nowrap; }
 .table b { font-weight: 700; }
 .table th.is-ours { color: var(--fig-series-hos-label); }
@@ -141,7 +165,11 @@ figcaption.figcap { margin-top: 18px; }
 .table.mc-table .mc-cell { text-align: center; padding-left: 10px; padding-right: 10px; }
 .table.mc-table .mc-group { padding-bottom: 0; border-bottom: none; }
 .table.mc-table .mc-rule { border-bottom: 1px solid var(--color-divider-strong); padding-bottom: 6px; }
-.table.mc-table tr.mc-model-start td { padding-top: 16px; }
+/* rules as in paper Table 2: under the header, above each model's block and at the bottom; none between rows */
+.table.mc-table tbody td { border-bottom: none; }
+.table.mc-table tr.mc-model-start td { border-top: 1px solid var(--color-divider-strong); padding-top: 16px; }
+.table.mc-table tbody tr:last-child td { border-bottom: 1px solid var(--color-divider-strong); }
+.table.mc-table td.mc-indent { padding-left: calc(var(--space-2) + 1.2em); }
 
 /* agentic table (paper Table 3) */
 .agentic-block { margin-top: 40px; }
@@ -150,6 +178,24 @@ figcaption.figcap { margin-top: 18px; }
 .table.agentic-table tr.group-start td { padding-top: 12px; }
 .table.agentic-table tr.group-end td { border-bottom: 1px solid var(--color-divider); padding-bottom: 12px; }
 .table.agentic-table .undefended { color: var(--undefended); }
+/* paper Table 1: one sub-table per model family, side by side when they fit */
+.rl-tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 545px), 1fr)); gap: 12px 40px; container-type: inline-size; } /* 545px: the wider sub-table; narrower columns stack them */
+.table.rl-table { min-width: 400px; table-layout: fixed; } /* the eval-target columns share the width left by the first column equally */
+.table.rl-table th:first-child, .table.rl-table td:first-child { width: 34%; }
+.table.rl-table th { white-space: normal; } /* a long target name may wrap in its column, as in the paper */
+.table.rl-table th.rl-group { padding-bottom: 0; border-bottom: none; }
+.table.rl-table thead tr:first-child th:first-child { border-bottom: none; } /* no rule under the empty corner cell */
+.table.rl-table .rl-rule { border-bottom: 1px solid var(--color-divider-strong); padding-bottom: 6px; text-align: center; }
+.table.rl-table th.rl-target { text-align: center; vertical-align: top; }
+.table.rl-table td:not(:first-child) { text-align: center; }
+@container (min-width: 1130px) { .table.rl-table .rl-br { display: block; height: 0; } } /* side by side: "w/" on a line of its own, as in the paper */
+/* rules only where the paper has them: around the static row, under "RL train target" and around the highest row */
+.table.rl-table tbody td { border-bottom: none; }
+.table.rl-table tr.rl-static td { border-bottom: 1px solid var(--color-divider-strong); }
+.table.rl-table tr.rl-section td { font-weight: var(--font-strong-weight); border-bottom: 1px solid var(--color-divider-strong); }
+.table.rl-table td.rl-indent { padding-left: calc(var(--space-2) + 1.2em); }
+.table.rl-table td.rl-self { background: color-mix(in srgb, var(--color-text) 9%, transparent); } /* the attack against its own training target */
+.table.rl-table tr.rl-highest td { border-top: 1px solid var(--color-divider-strong); border-bottom: 1px solid var(--color-divider-strong); }
 .delta-pair { display: inline-flex; justify-content: flex-end; gap: 6px; }
 .delta { min-width: 6.2ch; text-align: left; }
 .delta-better { color: var(--delta-better); }
@@ -158,7 +204,7 @@ figcaption.figcap { margin-top: 18px; }
 .figure-tight { margin: 4px 0 0; }
 
 /* — analysis — */
-.gates { margin-top: 64px; display: flow-root; scroll-margin-top: 72px; container: gates / inline-size; }
+.gates { display: flow-root; scroll-margin-top: 72px; container: gates / inline-size; }
 .gates-figure { float: right; margin: 0 0 20px 48px; width: 314px; max-width: 100%; display: flex; flex-direction: column; gap: 12px; }
 /* float beside the text only when at least ~380px remain for it (380 + 48 + 314) */
 @container gates (width < 742px) {
@@ -166,7 +212,7 @@ figcaption.figcap { margin-top: 18px; }
 }
 .gates-figure figcaption { margin: 0; }
 .gates-figure .caption { text-align: left; hyphens: manual; }
-.analysis-h3 { margin: 0; font-weight: 400; }
+.analysis-heading { margin: 0; font-weight: 400; font-size: var(--size-h3); } /* the attention page's section headings */
 .body-text { margin: 0; font-size: var(--type-body); line-height: var(--type-body-lh); color: var(--ink-80); }
 .gates .body-text.is-spaced { margin-top: 16px; }
 .heads-red { color: var(--heads-red); }
@@ -174,7 +220,7 @@ figcaption.figcap { margin-top: 18px; }
 .heads-red.is-strong, .heads-blue.is-strong { font-weight: 500; }
 
 .equation-wrap { margin: 18px 0; text-align: center; }
-.equation { display: inline-block; max-width: 100%; overflow-x: auto; vertical-align: top; font-size: 23px; line-height: 1; padding: 16px 20px; border-top: 1px solid var(--color-divider); border-bottom: 1px solid var(--color-divider); white-space: nowrap; }
+.equation { display: inline-block; max-width: 100%; overflow-x: auto; vertical-align: top; font-size: 21px; line-height: 1; padding: 16px 20px; border-top: 1px solid var(--color-divider); border-bottom: 1px solid var(--color-divider); white-space: nowrap; }
 .eq-sup { font-size: 0.68em; margin-left: 1px; }
 .eq-paren { font-size: 1.3em; line-height: 0; vertical-align: -0.08em; }
 .eq-idx { display: inline-flex; flex-direction: column; vertical-align: 0.56em; font-size: 0.68em; line-height: 1.15; margin-left: 1px; }
@@ -182,40 +228,40 @@ figcaption.figcap { margin-top: 18px; }
 .eq-t { color: var(--eq-trusted); }
 .eq-u { color: var(--eq-untrusted); }
 
-.blue-heads { margin-top: 72px; display: flex; flex-wrap: wrap; gap: 36px 64px; align-items: flex-start; scroll-margin-top: 72px; }
+.blue-heads { display: flex; flex-wrap: wrap; gap: 36px 64px; align-items: flex-start; scroll-margin-top: 72px; }
 .blue-heads-text { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
 .blue-heads-table { flex: 1 1 380px; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
 .blue-heads-table h5 { margin: 0; }
 
-.roles { margin-top: 72px; display: flex; flex-direction: column; gap: 16px; scroll-margin-top: 72px; }
+.roles { display: flex; flex-direction: column; gap: 16px; scroll-margin-top: 72px; }
 .roles figure { margin: 12px 0 0; }
 
-/* — try it: demo card — */
+/* — try it: code — */
+.code { margin-top: 48px; scroll-margin-top: 72px; }
+.demo { margin-top: 28px; scroll-margin-top: 72px; display: flex; flex-direction: column; gap: 16px; } /* "Play with it on Hugging Face" */
+.demo h4 { margin: 0; }
+/* the Space's card: the pitch and the button on the left, one scenario's example on the right */
 .demo-card { border: 1px solid var(--color-divider); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-wrap: wrap; align-items: stretch; }
 .demo-intro { flex: 1 1 380px; min-width: 0; padding: 40px 36px; display: flex; flex-direction: column; gap: 14px; }
-.demo-intro .kicker { margin: 0; font-size: 15px; } /* like the card kickers, not the section ones */
-.demo-headline { font-size: clamp(26px, 2.4vw, 32px); font-weight: 300; line-height: 1.2; letter-spacing: -0.015em; max-width: 22ch; }
-.demo-text { margin: 0; font-size: var(--type-body); line-height: var(--type-body-lh); max-width: 52ch; color: var(--ink-82); }
+.demo-headline { font-size: clamp(24px, calc(2.4vw - 2px), 30px); font-weight: 300; line-height: 1.2; letter-spacing: -0.015em; }
+.demo-text { margin: 0; font-size: var(--type-body); line-height: var(--type-body-lh); color: var(--ink-82); }
 .demo-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
-.demo-example { flex: 1 1 300px; min-width: 0; background: var(--fig-panel); padding: 28px; display: flex; flex-direction: column; justify-content: center; gap: 12px; font-family: var(--fig-font); font-size: 18px; color: var(--fig-ink); }
+.more-link { margin-top: 48px; } /* the pointer to the attention page, at the end of "Try it" */
+.more-link h4 { margin: 0 0 6px; }
+/* the demo example: one scenario's user turn, the tool output with the injection, and each model's first step */
+.demo-example { flex: 1 1 300px; min-width: 0; background: var(--fig-panel); padding: 28px; display: flex; flex-direction: column; justify-content: center; gap: 12px; font-family: var(--fig-font); font-size: 16px; color: var(--fig-ink); }
 .demo-turn { display: flex; gap: 10px; align-items: baseline; padding-left: 10px; border-left: 3px solid; }
 .demo-turn.is-user { border-left-color: var(--fig-bracket-trusted); }
 .demo-turn.is-tool { border-left-color: var(--fig-bracket-untrusted); }
-.demo-role { font-size: 15px; letter-spacing: .08em; text-transform: uppercase; font-weight: 500; width: 56px; flex: none; }
+.demo-role { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; font-weight: 500; width: 56px; flex: none; }
 .demo-turn.is-user .demo-role { color: var(--fig-text-trusted); }
 .demo-turn.is-tool .demo-role { color: var(--fig-text-untrusted); }
 .demo-tool-lines { display: flex; flex-direction: column; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
-.demo-outcomes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
-.demo-call { font-family: var(--font-mono); font-size: 18px; line-height: 26px; overflow-wrap: anywhere; }
+.demo-outcomes { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 10px; margin-top: 8px; }
+.demo-outcomes .card { background: var(--color-bg); }
+.demo-call { font-family: var(--font-mono); font-size: 16px; line-height: 23px; overflow-wrap: anywhere; }
 .demo-call.is-untrusted { color: var(--fig-text-untrusted); }
 .demo-call.is-trusted { color: var(--fig-text-trusted); }
-.demo-frame { border: 1px solid var(--color-divider); border-radius: var(--radius-md); overflow: hidden; }
-.demo-frame-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 6px 8px 6px 14px; border-bottom: 1px solid var(--color-divider); }
-.demo-frame-url { font-family: var(--font-mono); font-size: 15px; color: var(--color-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.demo-frame iframe { display: block; width: 100%; border: 0; background: var(--color-bg); }
-
-/* — try it: code — */
-.code { margin-top: 64px; scroll-margin-top: 72px; }
 .code h4 { margin: 0 0 6px; }
 .code-intro { font-size: var(--type-body); line-height: var(--type-body-lh); margin: 0 0 22px; color: var(--ink-78); }
 .code-stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
@@ -224,57 +270,48 @@ figcaption.figcap { margin-top: 18px; }
 .snippet-head .field-label { margin: 0; }
 .notebook { min-width: 0; margin-top: 8px; }
 .notebook-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 32px; }
-.notebook .card-body { font-size: var(--type-body); line-height: var(--type-body-lh); margin: 0; flex: 1 1 320px; max-width: 62ch; }
+.notebook .card-body { font-size: var(--type-body); line-height: var(--type-body-lh); margin: 0; flex: 1 1 320px; }
 .notebook-actions { display: flex; flex-wrap: wrap; gap: 8px; flex: none; }
 
 /* — cite — */
 .cite-title { margin: 0 0 28px; }
+.cite-meme { margin: 56px 0 0; } /* the meme, for those who read to the end */
+.cite-meme img { display: block; width: 100%; height: auto; border-radius: var(--radius-md); }
 
 /* — footer — */
-.site-footer { border-top: 1px solid var(--color-divider); }
-.site-footer-inner { max-width: var(--page-max); margin: 0 auto; padding: 28px var(--edge) 40px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 24px; font-size: 17.5px; color: var(--color-text-muted); }
-.site-footer .wordmark { font-size: 20px; } /* like the nav brand */
-.site-footer .wordmark b { color: var(--color-text); }
-.site-footer-links { display: flex; gap: 18px; font-size: 18px; }
 
 /* — the attention panels and their legend: side by side across the column when it is wide enough — */
 .wide-figure { display: flex; flex-direction: column; gap: 20px; }
 
 /* — design-system components, sized up to match the page text — */
-.nav-brand { font-size: 20px; }
-.nav a:not(.btn):not(.nav-brand) { font-size: 18px; }
-.btn { font-size: 18px; }
-.btn-sm { font-size: 18px; }
+.nav-brand { font-size: var(--type-body); }
+.nav a:not(.btn):not(.nav-brand) { font-size: 16px; }
+.btn { font-size: var(--type-body); } /* the resource buttons in the hero and the bar read like body text */
+.btn-sm { font-size: 16px; }
 .tag { font-size: calc(var(--type-body) * 0.76); }
-.att-panel .tag { font-size: inherit; }   /* tags and fold chips inside the attention panels follow the panel's 18px */
-.table { font-size: 18px; }
-.table th { font-size: 14.5px; }
-.card-kicker { font-size: 15px; }
-.card-title { font-size: 22px; }
-.field > label, .field-label { font-size: 17px; }
-.seg-opt { font-size: 18px; }
-.input { font-size: 18px; }
-.codeblock { font-size: 18px; }
+.att-panel .tag { font-size: inherit; }   /* tags and fold chips inside the attention panels follow the panel's 16px */
+.table { font-size: 16px; }
+.table th { font-size: 14px; text-transform: none; letter-spacing: 0; } /* column names as written, in every table */
+.card-kicker { font-size: 13px; }
+.card-title { font-size: 20px; }
+.field > label, .field-label { font-size: 15px; }
+.seg-opt { font-size: 16px; }
+.input { font-size: 16px; }
+.codeblock { font-size: 16px; }
+.fig-panel-title { font-size: 15px; }
 
-/* — laptops with a column under ~1060px: smaller author names, so six still fit on the first line — */
-@media (max-width: 1599px) {
-  :root { --type-name: 19px; --type-name-lh: 29px; }
-}
-
-/* — phones: a step down, as on the reference site (20px prose becomes 17–18px) — */
+/* — phones: a step down, as on the reference site — */
 @media (max-width: 640px) {
   :root {
-    --type-lede: 19px;    --type-lede-lh: 30px;
-    --type-body: 18px;    --type-body-lh: 28px;
-    --type-detail: 17.5px; --type-detail-lh: 27px;
-    --type-caption: 16px; --type-caption-lh: 24px;
-    --type-name: 18px;    --type-name-lh: 27px;
-    --type-affil: 16px;   --type-affil-lh: 24px;
-    --size-h3: 25px;
-    --size-h4: 21px;
-    --size-h5: 18px;
+    --type-lede: 17px;    --type-lede-lh: 27px;
+    --type-body: 16px;    --type-body-lh: 25px;
+    --type-detail: 15.5px; --type-detail-lh: 24px;
+    --type-caption: 14px; --type-caption-lh: 21px;
+    --size-h3: 23px;
+    --size-h4: 19px;
+    --size-h5: 16px;
   }
-  .seg-opt { font-size: 15.5px; padding: 6px 10px; }
+  .seg-opt { font-size: 13.5px; padding: 6px 10px; }
   /* the attention widget's three samples: one per row instead of three cramped columns */
   .seg-stack-phone .seg { flex-direction: column; }
   .seg-stack-phone .seg-opt + .seg-opt { border-left: 0; border-top: 1px solid var(--color-divider-strong); }

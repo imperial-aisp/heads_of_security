@@ -8,8 +8,6 @@ export const LINKS = {
   code: 'https://github.com/imperial-aisp/heads_of_security',
   models: 'https://huggingface.co/collections/imperial-cpg/heads-of-security',
   space: 'https://huggingface.co/spaces/igorshilov/heads-of-security',
-  /** Direct URL of the Space app, used for the iframe embed. The Space must be public. */
-  spaceEmbed: 'https://igorshilov-heads-of-security.hf.space',
   demos: 'https://github.com/imperial-aisp/heads_of_security/tree/main/demos',
   roleConfusion: 'https://openreview.net/forum?id=Lm3DQDyIsI',
 };
@@ -17,13 +15,6 @@ export const LINKS = {
 /** Tutorial notebook on GitHub; the Colab link is derived from it. */
 export const NOTEBOOK_URL = 'https://github.com/imperial-aisp/heads_of_security/blob/main/demos/introduction.ipynb';
 export const COLAB_URL = NOTEBOOK_URL.replace('https://github.com/', 'https://colab.research.google.com/github/');
-
-export const DEMO = {
-  /** Embed the Space on page load. Off by default so page views don't wake the Space. */
-  autoLoad: false,
-  /** Height of the embedded Space, in px. */
-  height: 1150,
-};
 
 /** Show the abstract expanded on page load. */
 export const ABSTRACT_OPEN = false;

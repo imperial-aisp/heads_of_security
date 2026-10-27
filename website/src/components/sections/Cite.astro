@@ -1,10 +1,23 @@
 ---
 import { CodeBlock } from '../ds/CodeBlock';
 import { BIBTEX } from '../../config';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/'); // the base path ends with a slash in builds but not in the dev server
 ---
 
 <section id="c-cite" class="section">
   <span class="kicker">Cite</span>
   <h2 class="section-title cite-title">BibTeX</h2>
   <CodeBlock client:load code={BIBTEX} />
+  {/* for those who read to the end: the meme behind the paper's name */}
+  <figure class="cite-meme">
+    <img
+      src={`${base}hos-header.webp`}
+      width="1584"
+      height="672"
+      alt="A three-headed dragon. Two heads say they are helpful, aligned and robust; the third says it will ignore previous instructions, and a dog in a cap labelled Security bonks it."
+      loading="lazy"
+      decoding="async"
+    />
+  </figure>
 </section>

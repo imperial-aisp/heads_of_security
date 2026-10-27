@@ -7,36 +7,23 @@ import { ABSTRACT_OPEN } from '../../config';
 <section id="c-method" class="section">
   <span class="kicker">TL;DR</span>
   <p class="tldr">A learned gate on every attention head allows the model to read tool outputs without following instructions injected in them.</p>
-  <p class="method-text">
-    Each token is assigned a channel (<span class="ch ch-trusted">trusted</span>, <span class="ch ch-untrusted">untrusted</span>, <span class="ch ch-template">template</span>). Before the softmax, each head scales its attention scores by a learned, channel-dependent gate, so that an instruction-following head can be prevented from reading untrusted content while other heads remain free to process that content, preserving the model's ability to reason over it.
-  </p>
   <AbstractToggle client:load defaultOpen={ABSTRACT_OPEN}>
     <p>
-      We introduce Heads of Security (HoS), a prompt injection defense that enforces instruction–data separation via a small set of learned per-head attention gates. HoS learns how each head should redistribute attention between trusted and untrusted tokens, enabling models to reason over untrusted content without following injected instructions. <br /><br />We evaluate HoS on Llama-3.3-70B-Instruct and GPT-OSS-20B. We compare it against SecAlign++, a state-of-the-art finetuning-based defense, and ASIDE, a defense that, like ours, builds instruction–data separation into the model architecture. We show that HoS offers greater robustness to adaptive attacks, better performance on standard utility benchmarks, and matches top performance on standard agentic prompt injection benchmarks. <br />More specifically, the black-box RL-Hammer attack reaches 97% ASR against GPT-OSS-20B and 85% against SecAlign, but only 10% against HoS. Claudini, a state-of-the-art white-box attack, strengthened against HoS through autoresearch, requires 3x more FLOPs to reach the same ASR on HoS as it does on GPT-OSS-20B or SecAlign. HoS preserves base-model utility across standard multiple-choice benchmarks and prompting setups, whereas SecAlign and ASIDE degrade in few-shot settings. On agentic benchmarks with static attacks, HoS and SecAlign perform similarly and substantially improve the security–utility trade-off over the base model. ASIDE struggles with tool use, achieving only 10% utility. These results show that prompt injection robustness can be achieved and improved through targeted attention interventions.
+      We introduce Heads of Security (HoS), a prompt injection defense that enforces instruction–data separation via a small set of learned per-head attention gates. HoS learns how each head should redistribute attention between trusted and untrusted tokens, enabling models to reason over untrusted content without following injected instructions.
+    </p>
+    <p>
+      We evaluate HoS on Llama-3.3-70B-Instruct and GPT-OSS-20B. We compare it against SecAlign++, a state-of-the-art finetuning-based defense, and ASIDE, a defense that, like ours, builds instruction–data separation into the model architecture. We show that HoS offers greater robustness to adaptive attacks, better performance on standard utility benchmarks, and matches top performance on standard agentic prompt injection benchmarks.
+    </p>
+    <p>
+      More specifically, the black-box RL-Hammer attack reaches 97% ASR against GPT-OSS-20B and 85% against SecAlign, but only 10% against HoS. Claudini, a state-of-the-art white-box attack, strengthened against HoS through autoresearch, requires 3x more FLOPs to reach the same ASR on HoS as it does on GPT-OSS-20B or SecAlign. HoS preserves base-model utility across standard multiple-choice benchmarks and prompting setups, whereas SecAlign and ASIDE degrade in few-shot settings. On agentic benchmarks with static attacks, HoS and SecAlign perform similarly and substantially improve the security–utility trade-off over the base model. ASIDE struggles with tool use, achieving only 10% utility. These results show that prompt injection robustness can be achieved and improved through targeted attention interventions.
     </p>
   </AbstractToggle>
   <figure>
     <GateDiagram client:load />
     <figcaption class="figcap">
       <p class="caption">
-        <span class="caption-lead">(For illustration)</span> A single head with hand-picked scores, shown to illustrate the mechanism. The head initially attends strongly to both the trusted instruction (<code class="token token-trusted">Count</code> <code class="token token-trusted">R’s</code>) and the injected instruction (<code class="token token-untrusted">Send</code> <code class="token token-untrusted">money</code>). Learned gates keep trusted and chat-template tokens (1x and 0.9x) while suppressing untrusted tokens (0.1x), shifting attention toward the trusted instruction. Gates are learned independently per head, so other heads may retain or increase attention to untrusted tokens.
+        <span class="caption-lead">(For illustration)</span> A single head with hand-picked scores, shown to illustrate the mechanism. Each token is assigned a channel (<span class="ch ch-trusted">trusted</span>, <span class="ch ch-untrusted">untrusted</span>, <span class="ch ch-template">template</span>). Before the softmax, each head scales its attention scores by a learned, channel-dependent gate, so that an instruction-following head can be prevented from reading untrusted content while other heads remain free to process that content, preserving the model's ability to reason over it. HoS trains only gate parameters: 18,432 scalars on GPT-OSS-20B, 46,080 on Llama-3.3-70B, trained with the SecAlign++ DPO recipe. The base model weights never change.
       </p>
     </figcaption>
   </figure>
-  <div class="steps">
-    <div class="step">
-      <h5>Tag by source</h5>
-      <p>
-        Every token is assigned a channel (<span class="ch ch-trusted">trusted</span>, <span class="ch ch-untrusted">untrusted</span>, <span class="ch ch-template">template</span>) based on its source. Tool outputs are <span class="ch ch-untrusted">untrusted</span>.
-      </p>
-    </div>
-    <div class="step">
-      <h5>Gate each head</h5>
-      <p>Each head adds a learned per-channel bias, log σ(g), to its attention logits. Some heads learn to shift attention away from untrusted input, others still attend to it.</p>
-    </div>
-    <div class="step">
-      <h5>Train only the gates</h5>
-      <p>HoS trains only gate parameters: 18,432 scalars on GPT-OSS-20B, 46,080 on Llama-3.3-70B, trained with the SecAlign++ DPO recipe. The base model weights never change.</p>
-    </div>
-  </div>
 </section>

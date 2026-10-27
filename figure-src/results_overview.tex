@@ -1,12 +1,10 @@
 % Heads of Security project page: headline results figure (Utility + Security).
 % Derived from the paper's teaser: same preamble, plot styles, data and legend, except:
 %   - no method card (the page shows it as an interactive diagram)
-%   - the Utility card is stacked above the Security card; both share the wider card's width and the
-%     taller card's height (in the paper they sit side by side at a common height)
-%   - Utility gains an ARC-C (0-shot) panel first, from the paper's Table 2 (GPT-OSS-20B rows)
-%   - the legend is scaled down uniformly so its one line fits the cards' width
+%   - the Utility and Security cards sit side by side at a common height, as in the paper, each at its own width
+%   - the legend is one line above both cards, at the size of the card names
 % Rebuild: see README.md in this folder.
-% All numbers are the paper's GPT-OSS-20B results (Table 2 for ARC-C, MMLU-Pro and GSM8K; the teaser figure for the rest).
+% All numbers are the paper's GPT-OSS-20B results (Table 2 for MMLU-Pro and GSM8K; the teaser figure for the rest).
 \documentclass[border=2pt]{standalone}
 \usepackage{iftex}
 % Fonts: Roboto for everything (titles, labels, tick numbers).
@@ -113,26 +111,14 @@
   (0,-0.10) rectangle (0.40,0.10);}}
 
 \newsavebox\utilbox \newsavebox\secbox \newsavebox\ucontent \newsavebox\scontent
-\newlength\cardh \newlength\cardw
+\newlength\cardh \newlength\cardwu \newlength\cardws
 
 \begin{document}
 % setup lines end in % so no stray spaces reach the page (standalone boxes everything horizontally)
 \sbox\utilbox{%
 % =============== UTILITY group ===============
-\begin{tikzpicture}[baseline=(axC.north)]
-    \begin{axis}[teaser bars, name=axC, benchbelow={ARC-C (0-shot)},
-      ylabel={Accuracy $\uparrow$},
-      nodes near coords style={/pgf/number format/precision=0},
-      ymin=0, ymax=105, ytick={0,50,100},
-    ]
-      % paper Table 2, 0-shot
-      \addplot[bbar=cbase]  coordinates {(1,96.1)};
-      \addplot[mbar=csec]   coordinates {(2,94.8)};
-      \addplot[mbar=caside] coordinates {(3,94.7)};
-      \addplot[obar=cours]  coordinates {(4,95.4)};
-    \end{axis}
+\begin{tikzpicture}[baseline=(axA.north)]
     \begin{axis}[teaser bars, name=axA, benchbelow={MMLU-Pro (5-shot)},
-      at={($(axC.north east)+(9mm,0)$)}, anchor=north west,
       ylabel={Accuracy $\uparrow$},
       nodes near coords style={/pgf/number format/precision=0},
       ymin=0, ymax=105, ytick={0,50,100},
@@ -278,27 +264,26 @@
 % card content as in the paper: title strut, then the plots
 \sbox\ucontent{\begin{tabular}{@{}c@{}}\rule{0pt}{9mm}\\[-2mm]\usebox\utilbox\end{tabular}}%
 \sbox\scontent{\begin{tabular}{@{}c@{}}\rule{0pt}{9mm}\\[-2mm]\usebox\secbox\end{tabular}}%
-% both cards take the taller content's height (as in the paper) and the wider content's width (stacked)
+% both cards take the taller content's height (as in the paper); each keeps its own width
 \ifdim\dimexpr\ht\scontent+\dp\scontent\relax>\dimexpr\ht\ucontent+\dp\ucontent\relax
   \setlength\cardh{\dimexpr\ht\scontent+\dp\scontent+2\cardpad\relax}\else
   \setlength\cardh{\dimexpr\ht\ucontent+\dp\ucontent+2\cardpad\relax}\fi
-\ifdim\wd\scontent>\wd\ucontent
-  \setlength\cardw{\dimexpr\wd\scontent+2\cardpad\relax}\else
-  \setlength\cardw{\dimexpr\wd\ucontent+2\cardpad\relax}\fi
-\begin{minipage}{\cardw}
+\setlength\cardwu{\dimexpr\wd\ucontent+2\cardpad\relax}
+\setlength\cardws{\dimexpr\wd\scontent+2\cardpad\relax}
+\begin{minipage}{\dimexpr\cardwu+3mm+\cardws\relax}
   \centering
-  % ---- shared legend: the paper's one line, scaled down uniformly to the cards' width ----
-  \resizebox{\cardw}{!}{\fsz{11.8}%
+  % ---- shared legend: the paper's one line, at the size of the card names ----
+  {\fsz{11.8}%
     \swatch{cbase}~GPT-OSS-20B\hspace{2em}%
     \swatch{csec!50}~w/ SecAlign\hspace{2em}%
     \swatch{caside!50}~w/ ASIDE\hspace{2em}%
-    \swatch{cours}~w/ \textbf{H}eads \textbf{o}f \textbf{S}ecurity (ours)}
+    \swatch{cours}~w/ \textbf{H}eads \textbf{o}f \textbf{S}ecurity (ours)\par}
 
   \vspace{3mm}% gap between the legend and the chart cards
-  % ---- two faint cards: utility (steel-blue tint) above security (vermilion tint), names in the corners ----
+  % ---- two faint cards side by side: utility (steel-blue tint) left of security (vermilion tint), names in the corners ----
   \begin{tikzpicture}
-    \node[anchor=north west, inner sep=\cardpad, rounded corners=8pt, fill=tblue!6, draw=none, minimum width=\cardw, minimum height=\cardh] (uc) at (0,0) {\usebox\ucontent};
-    \node[anchor=north west, inner sep=\cardpad, rounded corners=8pt, fill=tred!5, draw=none, minimum width=\cardw, minimum height=\cardh] (sc) at ($(uc.south west)+(0,-3mm)$) {\usebox\scontent};
+    \node[anchor=north west, inner sep=\cardpad, rounded corners=8pt, fill=tblue!6, draw=none, minimum width=\cardwu, minimum height=\cardh] (uc) at (0,0) {\usebox\ucontent};
+    \node[anchor=north west, inner sep=\cardpad, rounded corners=8pt, fill=tred!5, draw=none, minimum width=\cardws, minimum height=\cardh] (sc) at ($(uc.north east)+(3mm,0)$) {\usebox\scontent};
     \node[anchor=north west, font=\robotolight\fsz{11.8}, text=black, inner sep=0pt] at ($(uc.north west)+(4mm,-3mm)$) {Utility};
     \node[anchor=north west, font=\robotolight\fsz{11.8}, text=black, inner sep=0pt] at ($(sc.north west)+(4mm,-3mm)$) {Security};
   \end{tikzpicture}

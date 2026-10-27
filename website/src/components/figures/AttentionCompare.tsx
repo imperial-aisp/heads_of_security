@@ -8,9 +8,11 @@ import type { TagTone } from '../ds/Tag';
 import banking from '../../assets/attention/banking-u13-i7.json';
 import slack from '../../assets/attention/slack-u7-i1.json';
 import workspace from '../../assets/attention/workspace-u8-i1.json';
+import slackWebpage from '../../assets/attention/slack-u0-i5.json';
+import workspaceFeedback from '../../assets/attention/workspace-u28-i2.json';
 import gates from '../../assets/attention/gates_delta.json';
 
-// Real attention from GPT-OSS-20B with the HoS gates off (base) and on, for the demo Space's first three
+// Real attention from GPT-OSS-20B with the HoS gates off (base) and on, for the demo Space's five
 // scenarios, computed by the repo's figure-src/attention/extract_attention.py: the attention paid by the first token
 // the model generates (the query, shown after the prompt) to every prompt token and to itself. The JSON files
 // carry the mean over all 24 x 64 heads, over the red heads (gate shift delta > 0) and over the blue heads
@@ -30,8 +32,14 @@ interface ArmData { query: Query; mean: number[]; shares: Shares; mean_red: numb
 interface Sample { id: string; title: string; n_tokens: number; tokens: string[]; channels: number[]; segments: Segment[]; folds: Fold[]; arms: Record<Arm, ArmData> }
 interface Gates { delta: number[][]; red: [number, number, number][]; blue: [number, number, number][] }
 
-const SAMPLES = [banking, slack, workspace] as unknown as Sample[];
-const LABELS: Record<string, string> = { 'banking-u13-i7': 'Banking · update my address', 'slack-u7-i1': 'Slack · add Charlie to a channel', 'workspace-u8-i1': 'Workspace · add meeting participants' };
+const SAMPLES = [banking, slack, workspace, slackWebpage, workspaceFeedback] as unknown as Sample[];
+const LABELS: Record<string, string> = {
+  'banking-u13-i7': 'Banking · update my address',
+  'slack-u7-i1': 'Slack · add Charlie to a channel',
+  'workspace-u8-i1': 'Workspace · add meeting participants',
+  'slack-u0-i5': 'Slack · read a webpage',
+  'workspace-u28-i2': 'Workspace · look up feedback scores',
+};
 const GATES = gates as unknown as Gates;
 const N_HEADS = GATES.delta.length * GATES.delta[0].length;
 const N_RED = GATES.delta.flat().filter((d) => d > 0).length;
@@ -44,9 +52,11 @@ const LABEL: Record<Channel, string> = { trusted: 'var(--fig-text-trusted)', unt
 const SINK = 'var(--color-divider-strong)';
 const HEAD_RGB: Record<Color, string> = { red: '180,4,38', blue: '59,76,192' }; // --heads-red, --heads-blue
 const HEAD_INK: Record<Color, string> = { red: 'var(--heads-red)', blue: 'var(--heads-blue)' };
+// `response` is a text answer with no tool call; in the Space's scenarios that answer completes the user's task
+// (the webpage's content, the feedback scores), so it is labelled like a user-task tool call.
 const VERDICT: Record<Generation['verdict'], [string, TagTone]> = {
   attacker: ['Follows the injection', 'untrusted'], user: ['Works on the user’s task', 'trusted'], other: ['Calls another tool', 'neutral'],
-  response: ['Replies without a tool call', 'neutral'], none: ['No action', 'neutral'],
+  response: ['Works on the user’s task', 'trusted'], none: ['No action', 'neutral'],
 };
 const fmtDelta = (d: number) => (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(2);
 
@@ -98,10 +108,10 @@ const fs = (k: number) => `calc(var(--type-body) * ${k})`;
 const caps = { fontSize: fs(0.74), letterSpacing: '.08em', textTransform: 'uppercase', fontWeight: 500 } as const;
 const fieldCol = { display: 'flex', flexDirection: 'column', gap: 6 } as const;
 const shareBar = { borderRadius: 1, transition: 'flex 320ms cubic-bezier(.2,.7,.2,1)' } as const;
-// inside a panel every text is the panel's size (18px): tokens, chips, labels and tags alike; the uppercase
-// labels (TRUSTED, NEXT ACTION, ...) are set smaller, as capitals at 18px read larger than mixed-case text
-const PANEL_FONT = 18;
-const capsIn = { ...caps, fontSize: 15 } as const;
+// inside a panel every text is the panel's size (16px): tokens, chips, labels and tags alike; the uppercase
+// labels (TRUSTED, NEXT ACTION, ...) are set smaller, as capitals at 16px read larger than mixed-case text
+const PANEL_FONT = 16;
+const capsIn = { ...caps, fontSize: 13 } as const;
 const mono = { fontFamily: 'var(--font-mono)', fontSize: 'inherit' } as const;
 const pct = (v: number, d = 0) => (v * 100).toFixed(d) + '%';
 const isSpecial = (t: string) => /^<\|[a-z_]+\|>$/.test(t);
@@ -109,10 +119,10 @@ const Swatch = ({ color }: { color: Color }) => <span aria-hidden="true" style={
 
 const SCEN_OPTIONS = SAMPLES.map((s) => ({ value: s.id, label: LABELS[s.id] ?? s.title.split(' (')[0] }));
 const MODE_OPTIONS = [
+  { value: 'single', label: 'One head' },
   { value: 'all', label: `Mean of all ${N_HEADS.toLocaleString('en')} heads` },
   { value: 'red', label: <span><Swatch color="red" />Mean of {N_RED} red heads</span> },
   { value: 'blue', label: <span><Swatch color="blue" />Mean of {N_BLUE} blue heads</span> },
-  { value: 'single', label: 'One head' },
 ];
 
 interface View { att: ArrayLike<number>; shares: Shares }
@@ -227,14 +237,14 @@ function Panel({ s, arm, view, vmax, name, nameColor, stroke, viewLabel }: { s: 
         })}
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', paddingLeft: 12, borderLeft: `3px solid ${SHADE[chan(s.n_tokens)]}` }}>
           <span style={mono}>{Array.from({ length: last.end - last.start }, (_, k) => tok(last.start + k))}{tok(s.n_tokens, { padding: '0 3px' })}</span>
-          <Tag tone="outline" style={{ fontSize: 15 }}>query (first generated token)</Tag>
+          <Tag tone="outline" style={{ fontSize: 13 }}>query (first generated token)</Tag>
         </div>
       </div>
 
       <div style={{ borderTop: '1px solid var(--color-divider)', padding: '16px 22px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ ...capsIn, color: 'var(--color-text-muted)' }}>Next action</span>
-          <Tag tone={tone} style={{ fontSize: 15 }}>{verdict}</Tag>
+          <Tag tone={tone} style={{ fontSize: 13 }}>{verdict}</Tag>
         </div>
         <div style={{ fontFamily: 'var(--font-mono)', lineHeight: 1.5, overflowWrap: 'anywhere' }}>{action}</div>
       </div>
@@ -244,7 +254,7 @@ function Panel({ s, arm, view, vmax, name, nameColor, stroke, viewLabel }: { s: 
 
 export default function AttentionCompare() {
   const [id, setId] = useState(SAMPLES[0].id);
-  const [mode, setMode] = useState<Mode>('all');
+  const [mode, setMode] = useState<Mode>('single'); // one head first: the per-head view is the point of the widget
   const [color, setColor] = useState<Color>('red');
   const [index, setIndex] = useState(0);
   const [heads, setHeads] = useState<{ id: string; file: HeadFile } | null>(null);
@@ -316,7 +326,7 @@ export default function AttentionCompare() {
         </div>
       ) : null}
 
-      <p style={{ margin: 0, lineHeight: 'var(--type-body-lh)', maxWidth: '78ch', color: 'var(--ink-80)', textAlign: 'justify', hyphens: 'auto' }}>
+      <p style={{ margin: 0, lineHeight: 'var(--type-body-lh)', color: 'var(--ink-80)', textAlign: 'justify', hyphens: 'auto' }}>
         Each panel shows how the <span className="tag tag-outline" style={{ padding: '0px 7px', verticalAlign: 1 }}>query</span> distributes its attention
         over the prompt. The <span className="tag tag-outline" style={{ padding: '0px 7px', verticalAlign: 1 }}>query</span> is the first token the model generates, shown after the
         prompt’s <code style={{ fontFamily: 'var(--font-mono)', fontSize: '0.86em' }}>{'<|start|>assistant'}</code>. {viewSentence} Hover any token to see the share of the query’s attention it receives.
@@ -327,7 +337,7 @@ export default function AttentionCompare() {
           <Panel s={s} arm="base" view={views.base} vmax={vmax} name="GPT-OSS-20B" nameColor="var(--color-text)" stroke="var(--color-divider)" viewLabel={viewLabel} />
           <Panel s={s} arm="hos" view={views.hos} vmax={vmax} name="w/ Heads of Security" nameColor="var(--fig-series-hos-label)" stroke="var(--color-trusted)" viewLabel={viewLabel} />
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 24px', alignItems: 'center', fontSize: 18, color: 'var(--color-text-muted)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 24px', alignItems: 'center', fontSize: 16, color: 'var(--color-text-muted)' }}>
           <span aria-hidden="true" />
           <span>Darker shading = more attention</span>
           {CHANNELS.map((ch) => (

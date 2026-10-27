@@ -1,17 +1,59 @@
 ---
+// The sticky bar at the top: the wordmark and the resource buttons. On wide screens a second nav, the
+// rail of section links, floats left of the text column (see "nav" in site.css); narrower screens have
+// only the bar.
 import Wordmark from '../Wordmark.astro';
+import Logo from '../Logo.astro';
+import Button from '../ds/Button.astro';
+import { Icon } from '../ds/Icon';
+import { COLAB_URL, LINKS } from '../../config';
 
-const LINKS = [
-  ['#c-method', 'Method'],
-  ['#c-results', 'Results'],
-  ['#c-attention', 'Attention'],
-  ['#c-analysis', 'Analysis'],
-  ['#c-try', 'Try it'],
-  ['#c-cite', 'Cite'],
-];
+interface Props {
+  /** The rail's links: sections of this page (#c-…), or another page of the site (`page`, shown with an arrow). */
+  sections: { href: string; label: string; page?: boolean }[];
+  /** On a secondary page: where the wordmark and the rail's first entry lead back to. */
+  back?: { href: string; label: string };
+}
+
+const { sections, back } = Astro.props;
 ---
 
-<nav class="nav site-nav" aria-label="Sections">
-  <a href="#c-top" class="nav-brand"><Wordmark /></a>
-  {LINKS.map(([href, label]) => <a href={href}>{label}</a>)}
+<nav class="nav site-nav" aria-label="Resources">
+  <a href={back ? back.href : '#c-top'} class="nav-brand"><Wordmark /></a>
+  <div class="nav-resources">
+    <Button variant="ghost" size="sm" href={LINKS.paper} external><Logo name="arxiv" />Paper</Button>
+    <Button variant="ghost" size="sm" href={LINKS.code} external><Logo name="github" />Code</Button>
+    <Button variant="ghost" size="sm" href={LINKS.models} external><Logo name="hugging-face" />Models</Button>
+    <Button variant="ghost" size="sm" href={LINKS.space} external><Logo name="hugging-face" />Live demo</Button>
+    <Button variant="ghost" size="sm" href={COLAB_URL} external><Logo name="colab" />Tutorial</Button>
+  </div>
 </nav>
+<nav class="site-rail" aria-label="Sections">
+  {back ? <a href={back.href} class="rail-back"><Icon name="arrow-left" size={14} />{back.label}</a> : null}
+  {
+    sections.map((s) => (
+      <a href={s.href} class:list={[s.page && 'rail-page']}>
+        {s.label}
+        {s.page ? <Icon name="arrow-up-right" size={14} /> : null}
+      </a>
+    ))
+  }
+</nav>
+
+<script>
+  // Marks the rail link of the section currently in view (styled through [aria-current]).
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.site-rail a[href^="#c-"]')];
+  const targets = links.map((a) => document.querySelector<HTMLElement>(a.hash)).filter((t): t is HTMLElement => t !== null);
+  const update = () => {
+    const line = innerHeight * 0.35; // a section is current once its top has passed the upper third of the viewport
+    let current: HTMLElement | null = null;
+    for (const t of targets) if (t.getBoundingClientRect().top <= line) current = t;
+    for (const a of links) {
+      if (current && a.hash === '#' + current.id) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    }
+  };
+  addEventListener('scroll', update, { passive: true });
+  addEventListener('resize', update);
+  update();
+</script>

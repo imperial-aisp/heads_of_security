@@ -1,0 +1,33 @@
+---
+// The second page: the gate analysis around the interactive before-and-after view of attention.
+import Base from '../layouts/Base.astro';
+import Nav from '../components/sections/Nav.astro';
+import Gates from '../components/sections/Gates.astro';
+import Attention from '../components/sections/Attention.astro';
+import BlueHeads from '../components/sections/BlueHeads.astro';
+import Roles from '../components/sections/Roles.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/'); // the base path ends with a slash in builds but not in the dev server
+const SECTIONS = [
+  { href: '#c-gates', label: 'Heads heatmap' },
+  { href: '#c-attention', label: 'Attention, before and after' },
+  { href: '#c-blue', label: 'Blue heads' },
+  { href: '#c-roles', label: 'Role confusion' },
+];
+---
+
+<Base
+  title="Heads of Security: attention and the learned gates"
+  description="How Heads of Security redistributes attention: the learned gates, an interactive before-and-after view of attention on prompt injections, the gates that attend more to untrusted content, and role confusion."
+>
+  <Nav sections={SECTIONS} back={{ href: base, label: 'Main page' }} />
+  <main class="page">
+    <header id="c-top" class="page-head">
+      <h1 class="section-title">Analyzing the learned attention gates</h1>
+    </header>
+    <Gates />
+    <Attention />
+    <BlueHeads />
+    <Roles />
+  </main>
+</Base>

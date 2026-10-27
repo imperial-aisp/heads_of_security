@@ -1,21 +1,20 @@
 ---
-import { Icon } from '../ds/Icon';
 import Button from '../ds/Button.astro';
+import Logo from '../Logo.astro';
 import Wordmark from '../Wordmark.astro';
 import { COLAB_URL, LINKS } from '../../config';
 
 // Name, marker (* equal contribution, † equal advising) and affiliation numbers, as on the paper;
-// null forces a line break, giving the paper's three rows.
+// null forces a line break: six names on the first row, three on the second.
 const AUTHORS: ([name: string, marker: string, affiliations: string] | null)[] = [
   ['Igor Shilov', '*', '1'],
   ['Xiaoxue Yang', '*', '1'],
   ['Alexander Panfilov', '*', '2,3,4'],
-  null,
   ['Evgenii Kortukov', '', '5'],
   ['Matthieu Meeus', '', '1'],
   ['Peter Romov', '', '1'],
-  ['Wojciech Samek', '', '5'],
   null,
+  ['Wojciech Samek', '', '5'],
   ['Jonas Geiping', '†', '2,3,4'],
   ['Yves-Alexandre de Montjoye', '†', '1'],
 ];
@@ -53,19 +52,10 @@ const NOTES: [marker: string, text: string][] = [
     {NOTES.map(([marker, text]) => <span><sup>{marker}</sup>{text}</span>)}
   </div>
   <div class="hero-actions">
-    <Button variant="secondary" href={LINKS.paper} external><Icon name="file-text" size={15} />Paper</Button>
-    <Button variant="secondary" href={LINKS.code} external><Icon name="github" size={15} />Code</Button>
-    <Button variant="secondary" href={LINKS.models} external><Icon name="box" size={15} />Models</Button>
-    <Button variant="secondary" href={LINKS.space} external><Icon name="play" size={15} />Live demo</Button>
-    <Button variant="secondary" href={COLAB_URL} external><Icon name="book-open" size={15} />Notebook</Button>
+    <Button variant="secondary" href={LINKS.paper} external><Logo name="arxiv" size={17} />Paper</Button>
+    <Button variant="secondary" href={LINKS.code} external><Logo name="github" size={17} />Code</Button>
+    <Button variant="secondary" href={LINKS.models} external><Logo name="hugging-face" size={17} />Models</Button>
+    <Button variant="secondary" href={LINKS.space} external><Logo name="hugging-face" size={17} />Live demo</Button>
+    <Button variant="secondary" href={COLAB_URL} external><Logo name="colab" size={17} />Tutorial</Button>
   </div>
-  <figure class="hero-strip">
-    <img
-      src={`${import.meta.env.BASE_URL.replace(/\/?$/, '/')}hos-header.webp`}
-      width="1584"
-      height="672"
-      alt="A three-headed dragon. Two heads say they are helpful, aligned and robust; the third says it will ignore previous instructions, and a dog in a cap labelled Security bonks it."
-      decoding="async"
-    />
-  </figure>
 </header>

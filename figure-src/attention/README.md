@@ -1,7 +1,7 @@
 # Attention data for "Where the next token looks"
 
 `extract_attention.py` computes the real attention shown in the page's attention widget: for the
-first three scenarios of the demo Space (`scenarios.json`, copied from the Space), it runs
+five scenarios of the demo Space (`scenarios.json`, copied from the Space), it runs
 GPT-OSS-20B with the HoS gates on and off, generates each arm's step (greedy, as in the Space) and
 records how much the first generated token, the query, attends to each prompt token in every head.
 

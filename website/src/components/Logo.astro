@@ -1,0 +1,16 @@
+---
+// Third-party marks on the resource buttons (arXiv, GitHub, Hugging Face, Google Colab). They are brand logos
+// that must not be restyled, so they are served as files from public/brands/ rather than inlined like the
+// lucide icons. Sources: arxiv.org's primary logo SVG (the logomark's three paths, unaltered), GitHub's
+// logo package (brand.github.com, the black Invertocat) and the Dashboard Icons collection
+// (dashboardicons.com) for the other two.
+interface Props {
+  name: 'arxiv' | 'github' | 'hugging-face' | 'colab';
+  size?: number;
+}
+
+const { name, size = 17 } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/'); // the base path ends with a slash in builds but not in the dev server
+---
+
+<img class="logo" src={`${base}brands/${name}.svg`} width={size} height={size} alt="" aria-hidden="true" decoding="async" />

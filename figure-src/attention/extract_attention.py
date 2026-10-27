@@ -175,7 +175,7 @@ def write_heads(path: Path, per_arm: dict[str, np.ndarray], chans: dict[str, np.
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--scenarios", default=Path(__file__).with_name("scenarios.json"))
-    ap.add_argument("--n", type=int, default=3)
+    ap.add_argument("--n", type=int, default=5, help="how many of the Space's scenarios to run (the page shows all five)")
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--full-out", type=Path, help="also save the complete [layers, heads, tokens] arrays here (.npy)")
     args = ap.parse_args()

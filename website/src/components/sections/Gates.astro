@@ -1,0 +1,27 @@
+---
+// How the learned gates redistribute attention: the gate heatmap, the Δ definition, red and blue heads.
+import GateHeatmap from '../figures/GateHeatmap';
+import GateLogit from './GateLogit.astro';
+---
+
+<section id="c-gates" class="section">
+  <div class="gates">
+    <h2 class="analysis-heading">How is attention redistributed?</h2>
+    <figure class="gates-figure">
+      <GateHeatmap height={380} />
+      <figcaption>
+        <p class="caption">Learned attention gates for GPT-OSS-20B. Each cell is one head in one layer and shows Δ<sup>(ℓ,k)</sup>.</p>
+      </figcaption>
+    </figure>
+    <p class="body-text is-spaced">For layer <i>ℓ</i> and head <i>k</i>, we measure how much the learned gates shift attention from untrusted to trusted keys:</p>
+    <p class="equation-wrap">
+      <span class="equation">Δ<sup class="eq-sup">(<i>ℓ,k</i>)</sup> = log <i>σ</i><span class="eq-paren">(</span><GateLogit to="T" /><span class="eq-paren">)</span> − log <i>σ</i><span class="eq-paren">(</span><GateLogit to="U" /><span class="eq-paren">)</span></span>
+    </p>
+    <p class="body-text">
+      where <GateLogit to="T" /> and <GateLogit to="U" /> are the gate logits from a <span class="ch ch-trusted">trusted</span> query to <span class="ch ch-trusted">trusted</span> and <span class="ch ch-untrusted">untrusted</span> keys.
+    </p>
+    <p class="body-text is-spaced">
+      Most values are positive: these <span class="heads-red is-strong">red heads</span> reduce their relative attention to untrusted keys, the expected direction for heads involved in instruction following. A minority of <span class="heads-blue is-strong">blue heads</span> instead shift attention toward untrusted content.
+    </p>
+  </div>
+</section>

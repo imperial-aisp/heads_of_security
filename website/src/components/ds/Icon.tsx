@@ -1,9 +1,12 @@
-import { BookOpen, Box, ChevronDown, ChevronUp, Copy, ExternalLink, FileText, Github, Play, Shuffle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ArrowUpRight, BookOpen, Box, ChevronDown, ChevronUp, Copy, ExternalLink, FileText, Github, Play, Shuffle } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 // Lucide icons used on the page (lucide-react pinned to 0.469.0, the version the prototype loads;
 // its brand icons such as Github are marked deprecated but still ship).
 const ICONS = {
+  'arrow-left': ArrowLeft,
+  'arrow-right': ArrowRight,
+  'arrow-up-right': ArrowUpRight,
   'book-open': BookOpen,
   box: Box,
   'chevron-down': ChevronDown,

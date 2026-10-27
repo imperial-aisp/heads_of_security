@@ -13,13 +13,14 @@ interface PaperFigureProps {
 export function PaperFigure({ src, alt, width = '90%' }: PaperFigureProps) {
   return (
     <img
+      className="paper-figure"
       src={src.src}
       width={src.width}
       height={src.height}
       alt={alt}
       loading="lazy"
       decoding="async"
-      style={{ display: 'block', width, height: 'auto', marginInline: 'auto' }}
+      style={{ display: 'block', width, maxWidth: '100%', height: 'auto', marginInline: 'auto' }}
     />
   );
 }

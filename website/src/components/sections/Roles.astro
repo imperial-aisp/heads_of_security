@@ -1,0 +1,22 @@
+---
+// Role confusion: role probes on GPT-OSS-20B with and without HoS.
+import RoleProbeChart from '../figures/RoleProbeChart';
+import { LINKS } from '../../config';
+---
+
+<section id="c-roles" class="section">
+  <div class="roles">
+    <h2 class="analysis-heading">Role confusion</h2>
+    <p class="body-text">
+      Recent work frames prompt injection as role confusion (<a href={LINKS.roleConfusion} target="_blank" rel="noopener" title="Charles Ye, Jasmine Cui, Dylan Hadfield-Menell. Prompt injection as role confusion. ICML 2026.">Ye et al., ICML 2026</a>): an instruction in the untrusted tool output may be viewed by the model as coming from the user, and thus be erroneously trusted. We apply their role probes (linear probes on hidden activations trained on neutral text wrapped in role tags) to GPT-OSS-20B and its HoS variant on AgentDojo, and show that HoS improves role perception.
+    </p>
+    <figure>
+      <RoleProbeChart />
+      <figcaption class="figcap">
+        <p class="caption">
+          (a) On AgentDojo benign user tasks, GPT-OSS-20B does not correctly perceive tool outputs, while HoS strongly improves the tool role perception across layers. (b) HoS decreases the perceived Userness of the injection tokens inside the tool outputs compared to GPT-OSS-20B.
+        </p>
+      </figcaption>
+    </figure>
+  </div>
+</section>

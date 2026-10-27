@@ -4,9 +4,9 @@
 paper's teaser with the same preamble, plot styles, data and legend, except:
 
 - no method card (the page shows the method as an interactive diagram);
-- the Utility card sits above the Security card;
-- Utility starts with an ARC-C (0-shot) panel, from the paper's Table 2;
-- the legend is scaled down uniformly (to about 9pt from the paper's 11.8pt) so its one line fits the cards' width;
+- the Utility and Security cards sit side by side at a common height, each at its own width;
+- the legend is one line above both cards at 11.8pt, the size of the card names (the page sizes the figure so
+  that this text is 2px larger than the body text).
 
 If you change the teaser's data or styles, copy the change into `results_overview.tex` too.
 
