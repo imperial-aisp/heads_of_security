@@ -18,7 +18,7 @@ export function PaperFigure({ src, alt, width = '90%' }: PaperFigureProps) {
       width={src.width}
       height={src.height}
       alt={alt}
-      loading="lazy"
+      loading="eager"
       decoding="async"
       style={{ display: 'block', width, maxWidth: '100%', height: 'auto', marginInline: 'auto' }}
     />
