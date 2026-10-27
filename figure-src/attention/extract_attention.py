@@ -84,12 +84,14 @@ def segments(tok, ids: list[int]) -> list[dict]:
 
 
 def folds(tok, ids: list[int], chans: list[int], segs: list[dict]) -> list[dict]:
-    """Long runs of template-channel tokens inside a message body (tool definitions etc.), and the chat
-    template's own system message (model identity, date, reasoning effort, channels)."""
+    """The chat template's own system message (model identity, date, reasoning effort, channels), the whole
+    developer message (the agent's instructions followed by the tool definitions), and any other long run of
+    template-channel tokens inside a message body."""
+    whole = {"system": "chat-template system message", "developer": "agent instructions and tool definitions"}
     out = []
     for s in segs:
-        if s["header"] == "system" and s["end"] - s["body"] >= FOLD_MIN:
-            out.append({"start": s["body"], "end": s["end"], "label": "chat-template system message"})
+        if s["header"] in whole and s["end"] - s["body"] >= FOLD_MIN:
+            out.append({"start": s["body"], "end": s["end"], "label": whole[s["header"]]})
             continue
         i = s["body"]
         while i < s["end"]:

@@ -204,8 +204,11 @@ function Panel({ s, arm, view, vmax, name, nameColor, stroke, viewLabel }: { s: 
               body.push(tok(i, isSpecial(s.tokens[i]) ? { ...mono, padding: '0 3px' } : undefined, t));
             }
           }
+          // the message is labelled with the channel of its visible tokens; a body folded whole (system and
+          // developer messages) with the channel of its content, not of the template tokens folded with it
           const count = [0, 0, 0];
           for (let i = seg.body; i < seg.end; i++) { const f = foldAt.get(i); if (f) { i = f.end - 1; continue; } count[s.channels[i]]++; }
+          if (count[0] + count[1] + count[2] === 0) for (let i = seg.body; i < seg.end; i++) if (s.channels[i] !== 2) count[s.channels[i]]++;
           if (count[0] + count[1] + count[2] === 0) for (let i = seg.body; i < seg.end; i++) count[s.channels[i]]++;
           const bodyChan = CHANNELS[count.indexOf(Math.max(...count))];
           return (
@@ -316,8 +319,7 @@ export default function AttentionCompare() {
       <p style={{ margin: 0, lineHeight: 'var(--type-body-lh)', maxWidth: '78ch', color: 'var(--ink-80)', textAlign: 'justify', hyphens: 'auto' }}>
         Each panel shows how the <span className="tag tag-outline" style={{ padding: '0px 7px', verticalAlign: 1 }}>query</span> distributes its attention
         over the prompt. The <span className="tag tag-outline" style={{ padding: '0px 7px', verticalAlign: 1 }}>query</span> is the first token the model generates, shown after the
-        prompt’s final <code className="token token-fig" style={{ fontSize: '0.82em' }}>{'<|start|>assistant'}</code> at the bottom of each panel. {viewSentence} The prompt is shown token by token; long chat-template blocks, such as the tool definitions, are folded into one line.
-        Hover any token to see the share of the query’s attention it receives.
+        prompt’s <code style={{ fontFamily: 'var(--font-mono)', fontSize: '0.86em' }}>{'<|start|>assistant'}</code>. {viewSentence} Hover any token to see the share of the query’s attention it receives.
       </p>
 
       <div className="wide-figure">
