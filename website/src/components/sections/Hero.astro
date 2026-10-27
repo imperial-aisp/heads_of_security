@@ -4,26 +4,31 @@ import Button from '../ds/Button.astro';
 import Wordmark from '../Wordmark.astro';
 import { COLAB_URL, LINKS } from '../../config';
 
-// null forces a line break, so the last three authors start line 2.
-const AUTHORS: ([name: string, affiliations: string] | null)[] = [
-  ['Igor Shilov', '1*'],
-  ['Xiaoxue Yang', '1*'],
-  ['Alexander Panfilov', '2,3,4*'],
-  ['Evgenii Kortukov', '5'],
-  ['Matthieu Meeus', '1'],
-  ['Peter Romov', '1'],
+// Name, marker (* equal contribution, † equal advising) and affiliation numbers, as on the paper;
+// null forces a line break, giving the paper's three rows.
+const AUTHORS: ([name: string, marker: string, affiliations: string] | null)[] = [
+  ['Igor Shilov', '*', '1'],
+  ['Xiaoxue Yang', '*', '1'],
+  ['Alexander Panfilov', '*', '2,3,4'],
   null,
-  ['Wojciech Samek', '6'],
-  ['Jonas Geiping', '2,3,4'],
-  ['Yves-Alexandre de Montjoye', '1'],
+  ['Evgenii Kortukov', '', '5'],
+  ['Matthieu Meeus', '', '1'],
+  ['Peter Romov', '', '1'],
+  ['Wojciech Samek', '', '5'],
+  null,
+  ['Jonas Geiping', '†', '2,3,4'],
+  ['Yves-Alexandre de Montjoye', '†', '1'],
 ];
 const AFFILIATIONS = [
   'Imperial College London',
+  'Tübingen AI Center',
   'ELLIS Institute Tübingen',
   'Max Planck Institute for Intelligent Systems',
-  'Tübingen AI Center',
-  'Fraunhofer IAIS',
-  'TU Berlin',
+  'Fraunhofer HHI',
+];
+const NOTES: [marker: string, text: string][] = [
+  ['*', 'Equal contribution'],
+  ['†', 'Equal advising'],
 ];
 ---
 
@@ -34,7 +39,7 @@ const AFFILIATIONS = [
     {
       AUTHORS.map((a) =>
         a ? (
-          <span>{a[0]}<sup>{a[1]}</sup></span>
+          <span>{a[0]}<sup>{a[1] ? `${a[1]} ${a[2]}` : a[2]}</sup></span>
         ) : (
           <span class="line-break" aria-hidden="true" />
         ),
@@ -42,8 +47,10 @@ const AFFILIATIONS = [
     }
   </div>
   <div class="hero-affiliations">
-    <span><sup>*</sup>Equal contribution</span>
     {AFFILIATIONS.map((name, i) => <span><sup>{i + 1}</sup>{name}</span>)}
+  </div>
+  <div class="hero-affiliations hero-notes">
+    {NOTES.map(([marker, text]) => <span><sup>{marker}</sup>{text}</span>)}
   </div>
   <div class="hero-actions">
     <Button variant="secondary" href={LINKS.paper} external><Icon name="file-text" size={15} />Paper</Button>
