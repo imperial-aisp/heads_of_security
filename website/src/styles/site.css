@@ -27,7 +27,7 @@
 
   /* Type scale for the page's own text (near stolen-thoughts.com's 20px / 32px prose); phones get the
      smaller values in the media query at the end of this file. */
-  --type-body: 19px;    --type-body-lh: 30px;    /* body paragraphs, subsection summaries, abstract */
+  --type-body: 18px;    --type-body-lh: 28px;    /* body paragraphs, captions, tables' notes, buttons; figures and names derive from it */
   --type-caption: 16px; --type-caption-lh: 25px; /* figure captions, table notes */
   --type-name: calc(var(--type-body) + 1px);   /* hero author names: a point over body size */
   --type-affil: calc(var(--type-body) - 1px);  /* hero affiliations: a point under */
