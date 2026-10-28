@@ -293,7 +293,7 @@ export default function AttentionCompare() {
   const step = (d: number) => setIndex((index + d + TOP[color].length) % TOP[color].length);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, fontFamily: 'var(--font-body)', fontSize: 'var(--type-body)', color: 'var(--color-text)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20, fontFamily: 'var(--font-body)', fontSize: 'var(--type-body)' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px 32px', alignItems: 'flex-end' }}>
         <div className="seg-stack-phone" style={fieldCol}>
           <span className="field-label" style={{ margin: 0 }}>Sample</span>
@@ -310,7 +310,7 @@ export default function AttentionCompare() {
           <Strip color="red" selected={color === 'red' ? index : null} onPick={(i) => { setColor('red'); setIndex(i); }} />
           <Strip color="blue" selected={color === 'blue' ? index : null} onPick={(i) => { setColor('blue'); setIndex(i); }} />
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', borderTop: '1px solid var(--color-divider)', paddingTop: 16 }}>
-            <span className="num" style={{ fontSize: fs(0.86), color: 'var(--ink-80)' }}>
+            <span className="num" style={{ fontSize: fs(0.86) }}>
               <span style={{ fontWeight: 500, color: 'var(--color-text)' }}>Layer {layer}, head {head}</span> · Δ = {fmtDelta(delta)} ·{' '}
               <span style={{ color: HEAD_INK[color] }}>{color} head: closes on {color === 'red' ? 'untrusted' : 'trusted'} tokens</span>
               {error ? <span style={{ color: 'var(--color-text-muted)' }}> · the per-head data could not be loaded ({error})</span> : !ready ? <span style={{ color: 'var(--color-text-muted)' }}> · loading the per-head data…</span> : null}
@@ -326,7 +326,7 @@ export default function AttentionCompare() {
         </div>
       ) : null}
 
-      <p style={{ margin: 0, lineHeight: 'var(--type-body-lh)', color: 'var(--ink-80)', textAlign: 'justify', hyphens: 'auto' }}>
+      <p style={{ margin: 0, lineHeight: 'var(--type-body-lh)', textAlign: 'justify', hyphens: 'auto' }}>
         Each panel shows how the <span className="tag tag-outline" style={{ padding: '0px 7px', verticalAlign: 1 }}>query</span> distributes its attention
         over the prompt. The <span className="tag tag-outline" style={{ padding: '0px 7px', verticalAlign: 1 }}>query</span> is the first token the model generates, shown after the
         prompt’s <code style={{ fontFamily: 'var(--font-mono)', fontSize: '0.86em' }}>{'<|start|>assistant'}</code>. {viewSentence} Hover any token to see the share of the query’s attention it receives.

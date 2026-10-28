@@ -1,7 +1,7 @@
-// Site-wide links and switches. Values marked TODO are placeholders to fill before launch.
+// Site-wide links and switches.
 
-/** arXiv identifier of the paper. TODO: placeholder until the preprint is out. */
-export const ARXIV_ID = 'XXXX.XXXXX';
+/** arXiv identifier of the paper. */
+export const ARXIV_ID = '2610.37657';
 
 export const LINKS = {
   paper: `https://arxiv.org/abs/${ARXIV_ID}`,
@@ -39,6 +39,7 @@ export const BIBTEX = [
   '             Meeus, Matthieu and Romov, Peter and Samek, Wojciech and Geiping, Jonas and',
   '             de Montjoye, Yves-Alexandre},',
   `  journal = {arXiv preprint arXiv:${ARXIV_ID}},`,
-  '  year    = {2026}',
+  '  year    = {2026},',
+  `  url     = {https://arxiv.org/abs/${ARXIV_ID}}`,
   '}',
 ].join('\n');

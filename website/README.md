@@ -41,11 +41,3 @@ with a custom domain the workflow builds for the root path automatically.
 | `src/styles/` | Design tokens and component classes (ported unchanged), plus `site.css` for page layout. The text column's width (`--page-max`) and the text sizes (`--type-*`) are set at the top of `site.css`, with smaller sizes for phones at the end. The sticky bar at the top holds the resource buttons; from 1360px wide the section links float left of the column (the `--rail`, `--shift` block) |
 
 Only the interactive parts ship JavaScript.
-
-## Before launch
-
-1. **Attention data** (`src/assets/attention/`, `public/attention/`) is real: GPT-OSS-20B with the gates off and
-   on, for the demo Space's first three scenarios, computed by `../figure-src/attention/extract_attention.py` on a
-   GPU (see its README). Rerun it if the gates, the scenarios or the Space's prompt construction change.
-2. **arXiv id** is the placeholder `XXXX.XXXXX` (`ARXIV_ID` in `src/config.ts`; used by the Paper links and
-   the BibTeX entry).

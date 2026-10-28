@@ -3,10 +3,11 @@
    components; everything else lives here. */
 
 :root {
-  --ink-86: color-mix(in srgb, var(--color-text) 86%, transparent);
-  --ink-82: color-mix(in srgb, var(--color-text) 82%, transparent);
-  --ink-80: color-mix(in srgb, var(--color-text) 80%, transparent);
-  --ink-78: color-mix(in srgb, var(--color-text) 78%, transparent);
+  /* Two tiers of text: headings in full ink, everything else (paragraphs, captions, tables, labels) in
+     85% ink. Mixed with the page background rather than transparent, so text on a coloured chip keeps the
+     same grey. The design system's muted colour is folded into the same tier. */
+  --ink-85: color-mix(in srgb, var(--color-text) 85%, var(--color-bg));
+  --color-text-muted: var(--ink-85);
   /* colour-bar extremes of the gate heatmap (paper Figure 2) */
   --heads-red: #b40426;
   --heads-blue: #3b4cc0;
@@ -26,23 +27,22 @@
 
   /* Type scale for the page's own text (near stolen-thoughts.com's 20px / 32px prose); phones get the
      smaller values in the media query at the end of this file. */
-  --type-lede: 20px;    --type-lede-lh: 32px;    /* section introductions, method text */
   --type-body: 19px;    --type-body-lh: 30px;    /* body paragraphs, subsection summaries, abstract */
-  --type-detail: 18px;  --type-detail-lh: 29px;  /* text inside "Show details" */
   --type-caption: 16px; --type-caption-lh: 25px; /* figure captions, table notes */
-  --type-name: var(--type-body);   /* hero author names: body size at every width */
-  --type-affil: var(--type-body);  /* hero affiliations: the same */
+  --type-name: calc(var(--type-body) + 1px);   /* hero author names: a point over body size */
+  --type-affil: calc(var(--type-body) - 1px);  /* hero affiliations: a point under */
   /* design-system sizes used by headings, kickers and the abstract */
   --size-h3: 28px;
   --size-h4: 22px;
-  --size-h5: 18px;
+  --size-h5: var(--type-body); /* block headings inside "Show details" sit at body size */
   --size-small: 14px;
   --size-body-lg: var(--type-body);
   --leading-unit: var(--type-body-lh);
 }
 
 html { scroll-behavior: smooth; }
-body { margin: 0; background: var(--color-bg); color: var(--color-text); text-wrap: pretty; }
+body { margin: 0; background: var(--color-bg); color: var(--ink-85); text-wrap: pretty; }
+h1, h2, h3, h4, h5, h6 { color: var(--color-text); } /* headings are the only text in full ink */
 a { color: var(--color-accent-700); }
 a:hover { color: var(--color-accent-800); }
 
@@ -94,7 +94,7 @@ a:hover { color: var(--color-accent-800); }
 .page-head { padding: 24px 0 40px; } /* the attention page's title block, in place of the hero */
 .section-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
 .section-title { font-size: clamp(30px, calc(3.4vw - 2px), 46px); margin: 0; }
-.lede { font-size: var(--type-lede); line-height: var(--type-lede-lh); margin: 14px 0 36px; color: var(--ink-78); }
+.lede { font-size: var(--type-body); line-height: var(--type-body-lh); margin: 14px 0 36px; } /* section introductions, at body size */
 .lede.is-flush { margin-bottom: 0; }
 .nowrap { flex: none; white-space: nowrap; }
 .scroll-x { overflow-x: auto; }
@@ -115,19 +115,20 @@ figcaption.figcap { margin-top: 18px; }
 /* a paper figure narrower than the column is centred, and its caption takes the figure's width, not the column's */
 figure:has(> img.paper-figure) { width: fit-content; max-width: 100%; margin-inline: auto; }
 figure:has(> img.paper-figure) > figcaption { width: min-content; min-width: 100%; } /* the caption follows the figure's width without widening it */
-.caption { margin: 0; font-size: var(--type-body); line-height: var(--type-body-lh); color: var(--color-text-muted); text-align: justify; hyphens: auto; text-wrap: pretty; }
-.caption-lead { color: var(--color-text); font-weight: 500; }
-.note { margin: 0; font-size: var(--type-body); line-height: var(--type-body-lh); color: var(--color-text-muted); }
+.caption { margin: 0; font-size: var(--type-body); line-height: var(--type-body-lh); text-align: justify; hyphens: auto; text-wrap: pretty; }
+.caption-lead { font-weight: 700; } /* bold, in the caption's own colour */
+.note { margin: 0; font-size: var(--type-body); line-height: var(--type-body-lh); }
 
 /* — hero — */
-.hero { padding: 24px 0 40px; scroll-margin-top: 64px; }
-.hero-title { font-size: clamp(48px, calc(8vw - 4px), 92px); margin: 0 0 0 -0.04em; }
+.hero { padding: 24px 0 40px; scroll-margin-top: 64px; container-type: inline-size; } /* the author rows respond to the column's width */
+.hero-title { font-size: clamp(44px, calc(8vw - 8px), 88px); margin: 0 0 0 -0.04em; }
 .hero-subtitle { font-size: clamp(21px, calc(2.6vw - 3px), 31px); line-height: 1.3; font-weight: 300; margin: 20px 0 0; } /* one line on laptops and up */
-.hero-authors { display: flex; flex-wrap: wrap; gap: 2px 20px; margin-top: 28px; font-size: var(--type-name); line-height: 1.25; }
+.hero-authors { display: flex; flex-wrap: wrap; gap: 2px 20px; margin-top: 28px; font-size: var(--type-name); line-height: 1.25; color: var(--color-text); } /* names in full ink, like the title */
 .hero-authors sup { color: var(--color-accent-700); line-height: 0; } /* superscripts must not push the rows apart */
-.hero-authors .line-break { flex-basis: 100%; height: 0; }
+.hero-authors .line-break { flex-basis: 100%; height: 0; } /* six names, then three */
+@container (max-width: 1015px) { .hero-authors .line-break { display: none; } } /* narrower than the six names need: wrap naturally (five, then four) */
 .hero-affiliations { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 18px; margin-top: 10px; font-size: var(--type-affil); line-height: 1.3; color: var(--color-text-muted); }
-.hero-affiliations sup { line-height: 0; }
+.hero-affiliations sup { line-height: 0; color: var(--color-accent-700); } /* gold, like the markers on the names */
 .hero-notes { margin-top: 4px; }   /* equal contribution / equal advising, on their own line under the affiliations */
 .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 36px; }
 
@@ -136,7 +137,7 @@ figure:has(> img.paper-figure) > figcaption { width: min-content; min-width: 100
 .abstract-block { margin: 12px 0 40px; }
 /* one column over the full width, at the toggle button's size, and indented like the button's label so the
    pair reads as one unit */
-.prose.abstract { max-width: none; font-size: 16px; line-height: 1.6; margin-top: 12px; padding-left: 11px; color: var(--ink-86); } /* 11px = the small button's inline padding plus its border */
+.prose.abstract { max-width: none; font-size: 16px; line-height: 1.6; margin-top: 12px; padding-left: 11px; } /* 11px = the small button's inline padding plus its border */
 .prose.abstract p { margin: 0; }
 .prose.abstract p + p { margin-top: 0.7em; }
 
@@ -144,7 +145,7 @@ figure:has(> img.paper-figure) > figcaption { width: min-content; min-width: 100
 .subsection { margin-top: 56px; padding-top: 28px; border-top: 1px solid var(--color-divider); scroll-margin-top: 72px; }
 .subsection-head { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; }
 .subsection-head h3 { margin: 0; font-weight: 400; }
-.subsection-summary { font-size: var(--type-body); line-height: var(--type-body-lh); margin: 10px 0 0; color: var(--ink-78); }
+.subsection-summary { font-size: var(--type-body); line-height: var(--type-body-lh); margin: 10px 0 0; }
 .subsection-body { margin-top: 28px; }
 
 .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 500px), 1fr)); gap: 36px 56px; }
@@ -152,7 +153,7 @@ figure:has(> img.paper-figure) > figcaption { width: min-content; min-width: 100
 .block { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
 .block h5 { margin: 0; }
 .h-aside { font-weight: 400; color: var(--color-text-muted); }
-.detail-text { margin: 0; font-size: var(--type-detail); line-height: var(--type-detail-lh); color: var(--ink-80); }
+.detail-text { margin: 0; font-size: var(--type-body); line-height: var(--type-body-lh); }
 .detail-note { margin: 0; font-size: var(--type-caption); line-height: var(--type-caption-lh); color: var(--color-text-muted); }
 
 .table.is-nowrap { white-space: nowrap; }
@@ -213,7 +214,7 @@ figure:has(> img.paper-figure) > figcaption { width: min-content; min-width: 100
 .gates-figure figcaption { margin: 0; }
 .gates-figure .caption { text-align: left; hyphens: manual; }
 .analysis-heading { margin: 0; font-weight: 400; font-size: var(--size-h3); } /* the attention page's section headings */
-.body-text { margin: 0; font-size: var(--type-body); line-height: var(--type-body-lh); color: var(--ink-80); }
+.body-text { margin: 0; font-size: var(--type-body); line-height: var(--type-body-lh); }
 .gates .body-text.is-spaced { margin-top: 16px; }
 .heads-red { color: var(--heads-red); }
 .heads-blue { color: var(--heads-blue); }
@@ -244,7 +245,7 @@ figure:has(> img.paper-figure) > figcaption { width: min-content; min-width: 100
 .demo-card { border: 1px solid var(--color-divider); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-wrap: wrap; align-items: stretch; }
 .demo-intro { flex: 1 1 380px; min-width: 0; padding: 40px 36px; display: flex; flex-direction: column; gap: 14px; }
 .demo-headline { font-size: clamp(24px, calc(2.4vw - 2px), 30px); font-weight: 300; line-height: 1.2; letter-spacing: -0.015em; }
-.demo-text { margin: 0; font-size: var(--type-body); line-height: var(--type-body-lh); color: var(--ink-82); }
+.demo-text { margin: 0; font-size: var(--type-body); line-height: var(--type-body-lh); }
 .demo-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
 .more-link { margin-top: 48px; } /* the pointer to the attention page, at the end of "Try it" */
 .more-link h4 { margin: 0 0 6px; }
@@ -263,7 +264,7 @@ figure:has(> img.paper-figure) > figcaption { width: min-content; min-width: 100
 .demo-call.is-untrusted { color: var(--fig-text-untrusted); }
 .demo-call.is-trusted { color: var(--fig-text-trusted); }
 .code h4 { margin: 0 0 6px; }
-.code-intro { font-size: var(--type-body); line-height: var(--type-body-lh); margin: 0 0 22px; color: var(--ink-78); }
+.code-intro { font-size: var(--type-body); line-height: var(--type-body-lh); margin: 0 0 22px; }
 .code-stack { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .snippet { display: flex; flex-direction: column; gap: 6px; }
 .snippet-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
@@ -294,6 +295,8 @@ figure:has(> img.paper-figure) > figcaption { width: min-content; min-width: 100
 .table th { font-size: 14px; text-transform: none; letter-spacing: 0; } /* column names as written, in every table */
 .card-kicker { font-size: 13px; }
 .card-title { font-size: 20px; }
+.card-body { color: inherit; } /* the same ink as every other paragraph */
+.tag-neutral { color: var(--ink-85); } /* folded-token summaries in the attention panels, in the text ink */
 .field > label, .field-label { font-size: 15px; }
 .seg-opt { font-size: 16px; }
 .input { font-size: 16px; }
@@ -303,13 +306,10 @@ figure:has(> img.paper-figure) > figcaption { width: min-content; min-width: 100
 /* — phones: a step down, as on the reference site — */
 @media (max-width: 640px) {
   :root {
-    --type-lede: 17px;    --type-lede-lh: 27px;
     --type-body: 16px;    --type-body-lh: 25px;
-    --type-detail: 15.5px; --type-detail-lh: 24px;
     --type-caption: 14px; --type-caption-lh: 21px;
     --size-h3: 23px;
     --size-h4: 19px;
-    --size-h5: 16px;
   }
   .seg-opt { font-size: 13.5px; padding: 6px 10px; }
   /* the attention widget's three samples: one per row instead of three cramped columns */
