@@ -27,13 +27,13 @@
 
   /* Type scale for the page's own text (near stolen-thoughts.com's 20px / 32px prose); phones get the
      smaller values in the media query at the end of this file. */
-  --type-body: 18px;    --type-body-lh: 28px;    /* body paragraphs, captions, tables' notes, buttons; figures and names derive from it */
+  --type-body: 16px;    --type-body-lh: 26px;    /* body paragraphs, captions, tables' notes, buttons; figures and names derive from it */
   --type-caption: 16px; --type-caption-lh: 25px; /* figure captions, table notes */
   --type-name: calc(var(--type-body) + 1px);   /* hero author names: a point over body size */
   --type-affil: calc(var(--type-body) - 1px);  /* hero affiliations: a point under */
   /* design-system sizes used by headings, kickers and the abstract */
-  --size-h3: 28px;
-  --size-h4: 22px;
+  --size-h3: 24px;
+  --size-h4: 20px;
   --size-h5: var(--type-body); /* block headings inside "Show details" sit at body size */
   --size-small: 14px;
   --size-body-lg: var(--type-body);
@@ -93,7 +93,7 @@ a:hover { color: var(--color-accent-800); }
 .section { border-top: 1px solid var(--color-divider); padding: 56px 0; scroll-margin-top: 64px; }
 .page-head { padding: 24px 0 40px; } /* the attention page's title block, in place of the hero */
 .section-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
-.section-title { font-size: clamp(30px, calc(3.4vw - 2px), 46px); margin: 0; }
+.section-title { font-size: clamp(28px, calc(2.8vw - 2px), 38px); margin: 0; }
 .lede { font-size: var(--type-body); line-height: var(--type-body-lh); margin: 14px 0 36px; } /* section introductions, at body size */
 .lede.is-flush { margin-bottom: 0; }
 .nowrap { flex: none; white-space: nowrap; }
