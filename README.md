@@ -1,6 +1,14 @@
 # Heads of Security
 
+<p align="left">
+  <a href="https://imperial-aisp.github.io/heads_of_security/">Website</a> •
+  <a href="https://arxiv.org/abs/2610.37657">Paper</a> •
+  <a href="https://huggingface.co/collections/imperial-cpg/heads-of-security">Models</a> •
+  <a href="https://huggingface.co/spaces/igorshilov/heads-of-security">Demo</a>
+</p>
+
 ![Header](hos_header.png)
+
 
 ## Summary
 
@@ -142,3 +150,11 @@ Each token is assigned to one of three channels: trusted instructions and conver
 Only the gates are trained; the base model stays frozen. Training favors responses that follow the user's task over responses that follow injected instructions. This teaches the gates to reduce the influence of malicious instructions in untrusted data.
 
 See [the gate documentation](gates/README.md) for training and file details.
+
+## Models
+
+We share 3 model collections
+
+* Heads of Security (GPT-OSS-20B + Llama-3.3-70B): https://huggingface.co/collections/imperial-cpg/heads-of-security
+* SecAlign++ on GPT-OSS-20B: https://huggingface.co/collections/imperial-cpg/secalign-gpt-oss-20b
+* RL-Hammer trained attackers: https://huggingface.co/collections/imperial-cpg/rl-hammer
